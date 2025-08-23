@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "package": "com.nanaios.AppliedAmmoBox.mixin",
   "compatibilityLevel": "JAVA_8",
-  "refmap": "appliedtacz.refmap.json",
+  "refmap": "applied_ammo_box.refmap.json",
   "mixins": [
   ],
   "client": [

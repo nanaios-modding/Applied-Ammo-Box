@@ -1,5 +1,6 @@
 package com.nanaios.AppliedAmmoBox.item;
 
+import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
@@ -34,11 +35,9 @@ import java.util.List;
 import java.util.Optional;
 
 public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItemDataAccessor {
-    public static final ResourceLocation PROPERTY_NAME = new ResourceLocation(GunMod.MOD_ID, "ammo_statue");
+    public static final ResourceLocation PROPERTY_NAME = AppliedAmmoBox.rl(GunMod.MOD_ID, "ammo_statue");
 
     public static final int IRON_LEVEL = 0;
-    public static final int GOLD_LEVEL = 1;
-    public static final int DIAMOND_LEVEL = 2;
 
     private static final String DISPLAY_TAG = "display";
     private static final String COLOR_TAG = "color";
@@ -51,6 +50,15 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
 
     public WirelessAmmoBoxItem() {
         super(new Properties().stacksTo(1));
+    }
+
+
+    @Override
+    public void setAmmoCount(ItemStack ammoBox, int count) {
+
+        System.out.println("applied ammo box: set ammo count = " + count);
+
+        AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -108,10 +116,6 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
 
             // 格子为空，那就是取出物品
             if (slotItem.isEmpty()) {
-                // 创造模式弹药箱不能取出任何东西
-                if (isAllTypeCreative(ammoBox) || isCreative(ammoBox)) {
-                    return false;
-                }
                 // 啥也没有，不能取出
                 if (boxAmmoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
                     return false;
@@ -138,10 +142,6 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
 
             // 如果是子弹
             if (slotItem.getItem() instanceof IAmmo iAmmo) {
-                // 全类型弹药箱不能存入
-                if (isAllTypeCreative(ammoBox)) {
-                    return false;
-                }
                 ResourceLocation slotAmmoId = iAmmo.getAmmoId(slotItem);
                 // 格子里的子弹 ID 不对，不能放
                 if (slotAmmoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
@@ -184,9 +184,6 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
-        if (isAllTypeCreative(stack) || isCreative(stack)) {
-            return false;
-        }
         return !this.getAmmoId(stack).equals(DefaultAssets.EMPTY_AMMO_ID) && this.getAmmoCount(stack) > 0;
     }
 
@@ -200,14 +197,6 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
             return ammoCount / totalCount;
         }).orElse(0d);
         return (int) Math.min(1 + 12 * widthPercent, 13);
-    }
-
-    @Override
-    public boolean isFoil(ItemStack stack) {
-        if (isAllTypeCreative(stack) || isCreative(stack)) {
-            return true;
-        }
-        return super.isFoil(stack);
     }
 
     @Override
@@ -234,15 +223,6 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level pLevel, List<Component> components, TooltipFlag isAdvanced) {
-        if (isAllTypeCreative(stack)) {
-            components.add(Component.translatable("tooltip.tacz.ammo_box.usage.all_type_creative").withStyle(ChatFormatting.GOLD));
-            return;
-        }
-        if (isCreative(stack)) {
-            components.add(Component.translatable("tooltip.tacz.ammo_box.usage.creative.1").withStyle(ChatFormatting.YELLOW));
-            components.add(Component.translatable("tooltip.tacz.ammo_box.usage.creative.2").withStyle(ChatFormatting.YELLOW));
-            return;
-        }
         components.add(Component.translatable("tooltip.tacz.ammo_box.usage.deposit").withStyle(ChatFormatting.GRAY));
         components.add(Component.translatable("tooltip.tacz.ammo_box.usage.remove").withStyle(ChatFormatting.GRAY));
     }

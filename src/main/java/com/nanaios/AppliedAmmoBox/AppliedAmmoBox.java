@@ -1,6 +1,8 @@
 package com.nanaios.AppliedAmmoBox;
 
 import com.nanaios.AppliedAmmoBox.registries.AppliedAmmoBoxItems;
+import com.tacz.guns.GunMod;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -13,5 +15,10 @@ public class AppliedAmmoBox {
         IEventBus modEventBus = context.getModEventBus();
 
         AppliedAmmoBoxItems.ITEMS.register(modEventBus);
+    }
+
+    @SuppressWarnings("removal")
+    public static ResourceLocation rl(String type,String path) {
+        return new ResourceLocation(type, path);
     }
 }
