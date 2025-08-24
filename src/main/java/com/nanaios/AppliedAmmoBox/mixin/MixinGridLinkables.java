@@ -2,6 +2,7 @@ package com.nanaios.AppliedAmmoBox.mixin;
 
 import appeng.api.features.GridLinkables;
 import appeng.api.features.IGridLinkableHandler;
+import com.nanaios.AppliedAmmoBox.item.ILinkableItem;
 import com.nanaios.AppliedAmmoBox.item.WirelessAmmoBoxItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
@@ -16,8 +17,8 @@ public class MixinGridLinkables {
     private static void mixinGridLinkables$get(ItemLike itemLike, CallbackInfoReturnable<IGridLinkableHandler> cir) {
 
         Item itemInMixin = itemLike.asItem();
-        if(itemInMixin != null && itemInMixin instanceof WirelessAmmoBoxItem) {
-            cir.setReturnValue(WirelessAmmoBoxItem.LINKABLE_HANDLER);
+        if(itemInMixin != null && itemInMixin instanceof ILinkableItem linkable) {
+            cir.setReturnValue(linkable.getLinkableHandler());
         }
     }
 }

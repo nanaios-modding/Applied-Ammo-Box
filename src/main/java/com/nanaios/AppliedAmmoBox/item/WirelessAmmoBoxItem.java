@@ -44,24 +44,21 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItemDataAccessor {
+public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItemDataAccessor,ILinkableItem {
 
-    private static final Logger LOG = LoggerFactory.getLogger(WirelessAmmoBoxItem.class);
+    //private static final Logger LOG = LoggerFactory.getLogger(WirelessAmmoBoxItem.class);
 
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
-    private static final String TAG_ACCESS_POINT_POS = "accessPoint";
+    //private static final String TAG_ACCESS_POINT_POS = "accessPoint";
 
-    public static final int IRON_LEVEL = 0;
+    //public static final int IRON_LEVEL = 0;
 
-    private static final String DISPLAY_TAG = "display";
-    private static final String COLOR_TAG = "color";
+    //private static final String DISPLAY_TAG = "display";
+    //private static final String COLOR_TAG = "color";
 
-    private static final int OPEN = 0;
-    private static final int CLOSE = 1;
-
-    private static final int CREATIVE_INDEX = 6;
-    private static final int ALL_TYPE_CREATIVE_INDEX = 8;
+    //private static final int OPEN = 0;
+    //private static final int CLOSE = 1;
 
     public WirelessAmmoBoxItem() {
         super(new Properties().stacksTo(1));
@@ -73,15 +70,15 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
         AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    /* @OnlyIn(Dist.CLIENT)
     public static int getColor(ItemStack stack, int tintIndex) {
         return tintIndex > 0 ? -1 : getTagColor(stack);
-    }
+    } */
 
-    @OnlyIn(Dist.CLIENT)
+    /* @OnlyIn(Dist.CLIENT)
     public static float getStatue(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
         return 8;
-    }
+    } */
 
     @Override
     public boolean isAmmoBoxOfGun(ItemStack gun, ItemStack ammoBox) {
@@ -90,8 +87,8 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
             if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {return false;}
             ResourceLocation gunId = iGun.getGunId(gun);
 
-            WirelessAmmoBoxItem.LOG.info("gunId = {}",gunId);
-            WirelessAmmoBoxItem.LOG.info("ammoId = {}",ammoId);
+            //WirelessAmmoBoxItem.LOG.info("gunId = {}",gunId);
+            //WirelessAmmoBoxItem.LOG.info("ammoId = {}",ammoId);
 
             return TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId().equals(ammoId)).orElse(false);
         }
@@ -99,24 +96,24 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
         //return AmmoBoxItemDataAccessor.super.isAmmoBoxOfGun(gun, ammoBox);
     }
 
-    private static int getOpenStatue(ItemStack stack, IAmmoBox iAmmoBox) {
+    /* private static int getOpenStatue(ItemStack stack, IAmmoBox iAmmoBox) {
         boolean idIsEmpty = iAmmoBox.getAmmoId(stack).equals(DefaultAssets.EMPTY_AMMO_ID);
         boolean countIsZero = iAmmoBox.getAmmoCount(stack) <= 0;
         if (idIsEmpty || countIsZero) {
             return OPEN;
         }
         return CLOSE;
-    }
+    } */
 
-    private static int getLevelStatue(ItemStack stack, IAmmoBox iAmmoBox) {
+    /* private static int getLevelStatue(ItemStack stack, IAmmoBox iAmmoBox) {
         return iAmmoBox.getAmmoLevel(stack);
-    }
+    } */
 
-    private static int getTagColor(ItemStack stack) {
+    /* private static int getTagColor(ItemStack stack) {
 
         CompoundTag compoundtag = stack.getTagElement(DISPLAY_TAG);
         return compoundtag != null && compoundtag.contains(COLOR_TAG, Tag.TAG_ANY_NUMERIC) ? compoundtag.getInt(COLOR_TAG) : 0x727d6b;
-    }
+    } */
 
     @Override
     public boolean overrideOtherStackedOnMe(@NotNull ItemStack stack, @NotNull ItemStack pOther, @NotNull Slot slot, @NotNull ClickAction action, @NotNull Player player, @NotNull SlotAccess access) {
@@ -186,9 +183,9 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
         return false;
     }
 
-    private void playRemoveOneSound(Entity entity) {
+    /* private void playRemoveOneSound(Entity entity) {
         entity.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
-    }
+    } */
 
     private void playInsertSound(Entity entity) {
         entity.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
@@ -245,37 +242,8 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
         components.add(Component.translatable("tooltip.tacz.ammo_box.usage.remove").withStyle(ChatFormatting.GRAY));
     }
 
-    //以下リンク系統
-
-    @Nullable
-    public GlobalPos getLinkedPosition(ItemStack item) {
-        CompoundTag tag = item.getTag();
-        if (tag != null && tag.contains(TAG_ACCESS_POINT_POS, Tag.TAG_COMPOUND)) {
-            return GlobalPos.CODEC.decode(NbtOps.INSTANCE, tag.get(TAG_ACCESS_POINT_POS))
-                    .resultOrPartial(Util.prefix("Linked position", LOG::error))
-                    .map(Pair::getFirst)
-                    .orElse(null);
-        } else {
-            return null;
-        }
-    }
-
-    private static class LinkableHandler implements IGridLinkableHandler {
-        @Override
-        public boolean canLink(ItemStack stack) {
-            return stack.getItem() instanceof WirelessAmmoBoxItem;
-        }
-
-        @Override
-        public void link(ItemStack itemStack, GlobalPos pos) {
-            GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, pos)
-                    .result()
-                    .ifPresent(tag -> itemStack.getOrCreateTag().put(TAG_ACCESS_POINT_POS, tag));
-        }
-
-        @Override
-        public void unlink(ItemStack itemStack) {
-            itemStack.removeTagKey(TAG_ACCESS_POINT_POS);
-        }
+    @Override
+    public IGridLinkableHandler getLinkableHandler() {
+        return WirelessAmmoBoxItem.LINKABLE_HANDLER;
     }
 }

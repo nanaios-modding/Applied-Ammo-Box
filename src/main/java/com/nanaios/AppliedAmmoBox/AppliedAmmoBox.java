@@ -5,10 +5,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Mod(AppliedAmmoBox.MODID)
 public class AppliedAmmoBox {
     public static final String MODID = "applied_ammo_box";
+
+    public static final Logger LOGGER = LogManager.getLogger();
 
     public AppliedAmmoBox(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
