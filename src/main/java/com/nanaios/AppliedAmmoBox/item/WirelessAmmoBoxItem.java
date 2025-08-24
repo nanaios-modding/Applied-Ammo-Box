@@ -1,5 +1,6 @@
 package com.nanaios.AppliedAmmoBox.item;
 
+import appeng.api.features.IGridLinkableHandler;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.DefaultAssets;
@@ -13,7 +14,9 @@ import com.tacz.guns.config.sync.SyncConfig;
 import com.tacz.guns.inventory.tooltip.AmmoBoxTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -32,12 +35,16 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
+
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
 public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItemDataAccessor {
-    public static final ResourceLocation PROPERTY_NAME = AppliedAmmoBox.rl(GunMod.MOD_ID, "ammo_statue");
+
+    public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
+
+    private static final String TAG_ACCESS_POINT_POS = "accessPoint";
 
     public static final int IRON_LEVEL = 0;
 
@@ -232,5 +239,24 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level pLevel, List<Component> components, @NotNull TooltipFlag isAdvanced) {
         components.add(Component.translatable("tooltip.tacz.ammo_box.usage.deposit").withStyle(ChatFormatting.GRAY));
         components.add(Component.translatable("tooltip.tacz.ammo_box.usage.remove").withStyle(ChatFormatting.GRAY));
+    }
+
+    private static class LinkableHandler implements IGridLinkableHandler {
+        @Override
+        public boolean canLink(ItemStack stack) {
+            return stack.getItem() instanceof WirelessAmmoBoxItem;
+        }
+
+        @Override
+        public void link(ItemStack itemStack, GlobalPos pos) {
+            GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, pos)
+                    .result()
+                    .ifPresent(tag -> itemStack.getOrCreateTag().put(TAG_ACCESS_POINT_POS, tag));
+        }
+
+        @Override
+        public void unlink(ItemStack itemStack) {
+            itemStack.removeTagKey(TAG_ACCESS_POINT_POS);
+        }
     }
 }
