@@ -8,6 +8,7 @@ import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IAmmo;
 import com.tacz.guns.api.item.IAmmoBox;
+import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
 import com.tacz.guns.config.sync.SyncConfig;
@@ -69,7 +70,6 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
 
     @Override
     public void setAmmoCount(ItemStack ammoBox, int count) {
-
         AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count);
     }
 
@@ -80,24 +80,23 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
 
     @OnlyIn(Dist.CLIENT)
     public static float getStatue(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
-        int openStatue = OPEN;
-        int ammoLevel = IRON_LEVEL;
-        if (stack.getItem() instanceof IAmmoBox iAmmoBox) {
-            if (iAmmoBox.isAllTypeCreative(stack)) {
-                return ALL_TYPE_CREATIVE_INDEX;
-            }
-            openStatue = getOpenStatue(stack, iAmmoBox);
-            if (iAmmoBox.isCreative(stack)) {
-                return openStatue + CREATIVE_INDEX;
-            }
-            ammoLevel = getLevelStatue(stack, iAmmoBox);
-        }
-        return openStatue + 2 * ammoLevel;
+        return 8;
     }
 
     @Override
-    public int getAmmoCount(ItemStack ammoBox) {
-        return AmmoBoxItemDataAccessor.super.getAmmoCount(ammoBox);
+    public boolean isAmmoBoxOfGun(ItemStack gun, ItemStack ammoBox) {
+        if (gun.getItem() instanceof IGun iGun && ammoBox.getItem() instanceof IAmmoBox iAmmoBox) {
+            ResourceLocation ammoId = iAmmoBox.getAmmoId(ammoBox);
+            if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {return false;}
+            ResourceLocation gunId = iGun.getGunId(gun);
+
+            WirelessAmmoBoxItem.LOG.info("gunId = {}",gunId);
+            WirelessAmmoBoxItem.LOG.info("ammoId = {}",ammoId);
+
+            return TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId().equals(ammoId)).orElse(false);
+        }
+        return false;
+        //return AmmoBoxItemDataAccessor.super.isAmmoBoxOfGun(gun, ammoBox);
     }
 
     private static int getOpenStatue(ItemStack stack, IAmmoBox iAmmoBox) {
@@ -114,6 +113,7 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     }
 
     private static int getTagColor(ItemStack stack) {
+
         CompoundTag compoundtag = stack.getTagElement(DISPLAY_TAG);
         return compoundtag != null && compoundtag.contains(COLOR_TAG, Tag.TAG_ANY_NUMERIC) ? compoundtag.getInt(COLOR_TAG) : 0x727d6b;
     }
@@ -132,7 +132,7 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
             ResourceLocation boxAmmoId = this.getAmmoId(ammoBox);
 
             // 格子为空，那就是取出物品
-            if (slotItem.isEmpty()) {
+            /* if (slotItem.isEmpty()) {
                 // 啥也没有，不能取出
                 if (boxAmmoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
                     return false;
@@ -155,7 +155,7 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
                     this.playRemoveOneSound(player);
                 });
                 return true;
-            }
+            } */
 
             // 如果是子弹
             if (slotItem.getItem() instanceof IAmmo iAmmo) {
@@ -171,11 +171,6 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
                     return false;
                 }
                 TimelessAPI.getCommonAmmoIndex(slotAmmoId).ifPresent(index -> {
-                    // 创造模式弹药箱，那就直接存入最大
-                    if (isCreative(ammoBox)) {
-                        this.setAmmoCount(ammoBox, Integer.MAX_VALUE);
-                        return;
-                    }
                     int boxAmmoCount = this.getAmmoCount(ammoBox);
                     int boxLevelMultiplier = this.getAmmoLevel(ammoBox) + 1;
                     int maxSize = index.getStackSize() * SyncConfig.AMMO_BOX_STACK_SIZE.get() * boxLevelMultiplier;

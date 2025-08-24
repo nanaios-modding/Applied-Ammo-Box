@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "applied_ammo_box.refmap.json",
   "mixins": [
-    "MixinGridLinkables"
+    "MixinGridLinkables",
+    "MixinAbstractGunItem"
   ],
   "client": [
   ],
