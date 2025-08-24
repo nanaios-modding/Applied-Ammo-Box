@@ -4,6 +4,7 @@ import appeng.api.features.IGridLinkableHandler;
 import appeng.core.localization.GuiText;
 import appeng.core.localization.Tooltips;
 import com.mojang.datafixers.util.Pair;
+import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IAmmo;
@@ -44,7 +45,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItemDataAccessor,ILinkableItem {
+public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItemDataAccessor,ILinkableItem,IExtraAmmoBox {
 
     //private static final Logger LOG = LoggerFactory.getLogger(WirelessAmmoBoxItem.class);
 
@@ -64,6 +65,11 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
         super(new Properties().stacksTo(1));
     }
 
+    @Override
+    public boolean isAmmoBoxOfGunWithExtra(ItemStack gun, ItemStack ammoBox, int extra) {
+        AppliedAmmoBox.LOGGER.info("info from override isAmmoBoxOfGunWithExtra!");
+        return IExtraAmmoBox.super.isAmmoBoxOfGunWithExtra(gun, ammoBox, extra);
+    }
 
     @Override
     public void setAmmoCount(ItemStack ammoBox, int count) {
