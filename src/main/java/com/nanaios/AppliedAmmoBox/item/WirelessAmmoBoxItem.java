@@ -6,6 +6,7 @@ import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IAmmo;
 import com.tacz.guns.api.item.IAmmoBox;
+import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
 import com.tacz.guns.config.sync.SyncConfig;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -58,7 +60,7 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
 
         System.out.println("applied ammo box: set ammo count = " + count);
 
-        AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count);
+        AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count + 10);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -83,6 +85,11 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
         return openStatue + 2 * ammoLevel;
     }
 
+    @Override
+    public int getAmmoCount(ItemStack ammoBox) {
+        return AmmoBoxItemDataAccessor.super.getAmmoCount(ammoBox);
+    }
+
     private static int getOpenStatue(ItemStack stack, IAmmoBox iAmmoBox) {
         boolean idIsEmpty = iAmmoBox.getAmmoId(stack).equals(DefaultAssets.EMPTY_AMMO_ID);
         boolean countIsZero = iAmmoBox.getAmmoCount(stack) <= 0;
@@ -102,12 +109,12 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     }
 
     @Override
-    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack pOther, Slot slot, ClickAction action, Player player, SlotAccess access) {
+    public boolean overrideOtherStackedOnMe(@NotNull ItemStack stack, @NotNull ItemStack pOther, @NotNull Slot slot, @NotNull ClickAction action, @NotNull Player player, @NotNull SlotAccess access) {
         return super.overrideOtherStackedOnMe(stack, pOther, slot, action, player, access);
     }
 
     @Override
-    public boolean overrideStackedOnOther(ItemStack ammoBox, Slot slot, ClickAction action, Player player) {
+    public boolean overrideStackedOnOther(@NotNull ItemStack ammoBox, @NotNull Slot slot, @NotNull ClickAction action, @NotNull Player player) {
         // 右击
         if (action == ClickAction.SECONDARY) {
             // 点击的格子
@@ -183,12 +190,12 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     }
 
     @Override
-    public boolean isBarVisible(ItemStack stack) {
+    public boolean isBarVisible(@NotNull ItemStack stack) {
         return !this.getAmmoId(stack).equals(DefaultAssets.EMPTY_AMMO_ID) && this.getAmmoCount(stack) > 0;
     }
 
     @Override
-    public int getBarWidth(ItemStack stack) {
+    public int getBarWidth(@NotNull ItemStack stack) {
         ResourceLocation ammoId = this.getAmmoId(stack);
         int ammoCount = this.getAmmoCount(stack);
         int boxLevelMultiplier = this.getAmmoLevel(stack) + 1;
@@ -200,12 +207,12 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     }
 
     @Override
-    public int getBarColor(ItemStack stack) {
+    public int getBarColor(@NotNull ItemStack stack) {
         return Mth.hsvToRgb(1 / 3f, 1.0F, 1.0F);
     }
 
     @Override
-    public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
+    public @NotNull Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
         if (!(stack.getItem() instanceof IAmmoBox iAmmoBox)) {
             return Optional.empty();
         }
@@ -222,7 +229,7 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level pLevel, List<Component> components, TooltipFlag isAdvanced) {
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level pLevel, List<Component> components, @NotNull TooltipFlag isAdvanced) {
         components.add(Component.translatable("tooltip.tacz.ammo_box.usage.deposit").withStyle(ChatFormatting.GRAY));
         components.add(Component.translatable("tooltip.tacz.ammo_box.usage.remove").withStyle(ChatFormatting.GRAY));
     }
