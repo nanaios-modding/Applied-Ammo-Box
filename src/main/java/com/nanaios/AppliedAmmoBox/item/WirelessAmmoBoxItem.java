@@ -1,18 +1,19 @@
 package com.nanaios.AppliedAmmoBox.item;
 
 import appeng.api.features.IGridLinkableHandler;
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
-import com.tacz.guns.GunMod;
+import appeng.core.localization.GuiText;
+import appeng.core.localization.Tooltips;
+import com.mojang.datafixers.util.Pair;
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IAmmo;
 import com.tacz.guns.api.item.IAmmoBox;
-import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
 import com.tacz.guns.config.sync.SyncConfig;
 import com.tacz.guns.inventory.tooltip.AmmoBoxTooltip;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
@@ -34,6 +35,8 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import javax.annotation.Nullable;
@@ -41,6 +44,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItemDataAccessor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(WirelessAmmoBoxItem.class);
 
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
@@ -65,9 +70,7 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     @Override
     public void setAmmoCount(ItemStack ammoBox, int count) {
 
-        System.out.println("applied ammo box: set ammo count = " + count);
-
-        AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count + 10);
+        AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -237,8 +240,29 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level pLevel, List<Component> components, @NotNull TooltipFlag isAdvanced) {
+        if (getLinkedPosition(stack) == null) {
+            components.add(Tooltips.of(GuiText.Unlinked, Tooltips.RED));
+        } else {
+            components.add(Tooltips.of(GuiText.Linked, Tooltips.GREEN));
+        }
+
         components.add(Component.translatable("tooltip.tacz.ammo_box.usage.deposit").withStyle(ChatFormatting.GRAY));
         components.add(Component.translatable("tooltip.tacz.ammo_box.usage.remove").withStyle(ChatFormatting.GRAY));
+    }
+
+    //以下リンク系統
+
+    @Nullable
+    public GlobalPos getLinkedPosition(ItemStack item) {
+        CompoundTag tag = item.getTag();
+        if (tag != null && tag.contains(TAG_ACCESS_POINT_POS, Tag.TAG_COMPOUND)) {
+            return GlobalPos.CODEC.decode(NbtOps.INSTANCE, tag.get(TAG_ACCESS_POINT_POS))
+                    .resultOrPartial(Util.prefix("Linked position", LOG::error))
+                    .map(Pair::getFirst)
+                    .orElse(null);
+        } else {
+            return null;
+        }
     }
 
     private static class LinkableHandler implements IGridLinkableHandler {

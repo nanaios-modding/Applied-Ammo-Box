@@ -17,7 +17,6 @@ public class MixinGridLinkables {
 
         Item itemInMixin = itemLike.asItem();
         if(itemInMixin != null && itemInMixin instanceof WirelessAmmoBoxItem) {
-            System.out.println("item instanceof ammobox!");
             cir.setReturnValue(WirelessAmmoBoxItem.LINKABLE_HANDLER);
         }
     }
