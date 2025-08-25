@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import javax.annotation.Nullable;
 
@@ -38,6 +39,8 @@ public interface ILinkableItem {
 
     default IGrid getGrid(ItemStack item,@Nullable Player sendMessagesTo) {
         Level level = sendMessagesTo.level();
+        AppliedAmmoBox.LOGGER.info("isClient = {}",level.isClientSide);
+
         if (!(level instanceof ServerLevel serverLevel)) {
             return null;
         }
@@ -54,9 +57,10 @@ public interface ILinkableItem {
             return null;
         }
 
-        //var nn = level.getBlockEntity(linkedPos.pos());
-
-        var be = Platform.getTickingBlockEntity(level, linkedPos.pos());
+        //もしかしたらunsafeだったりするかもしれない
+        //まずいか？これ
+        //TODO 現状問題なし。バグの時疑うべし
+        var be = level.getChunkAt(linkedPos.pos()).getBlockEntity(linkedPos.pos(), LevelChunk.EntityCreationType.IMMEDIATE);
 
         if (!(be instanceof IWirelessAccessPoint accessPoint)) {
             sendMessagesTo.displayClientMessage(PlayerMessages.LinkedNetworkNotFound.text(), true);
@@ -66,7 +70,14 @@ public interface ILinkableItem {
         var grid = accessPoint.getGrid();
         if (grid == null) {
             sendMessagesTo.displayClientMessage(PlayerMessages.LinkedNetworkNotFound.text(), true);
+            return null;
         }
+
+        if(!LinkableHandler.rangeCheck(grid,sendMessagesTo)) {
+            sendMessagesTo.displayClientMessage(PlayerMessages.OutOfRange.text(), true);
+            return null;
+        }
+
         return grid;
     }
 

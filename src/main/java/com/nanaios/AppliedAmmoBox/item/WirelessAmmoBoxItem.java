@@ -2,6 +2,8 @@ package com.nanaios.AppliedAmmoBox.item;
 
 import appeng.api.features.IGridLinkableHandler;
 import appeng.api.networking.IGrid;
+import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.AEKey;
 import appeng.core.localization.GuiText;
 import appeng.core.localization.Tooltips;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
@@ -13,8 +15,11 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
 import com.tacz.guns.config.sync.SyncConfig;
+import com.tacz.guns.init.ModItems;
 import com.tacz.guns.inventory.tooltip.AmmoBoxTooltip;
+import com.tacz.guns.item.AmmoItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -26,7 +31,9 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.*;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -42,7 +49,6 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     private boolean isCountChanged = false;
 
     private Player player;
-    private Level level;
 
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
@@ -53,40 +59,35 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         if (level.isClientSide()) return;
-
         if(entity instanceof Player p) {
             this.player = p;
         }
-        this.level = level;
-
-        stack.getDisplayName();
     }
 
     @Override
     public boolean isAmmoBoxOfGunWithExtra(ItemStack gun, ItemStack ammoBox, int extra) {
-
-        AppliedAmmoBox.LOGGER.info("info from override isAmmoBoxOfGunWithExtra!");
-
-        IGrid grid = getGrid(ammoBox, player);
-
-        if(grid != null) {
-            AppliedAmmoBox.LOGGER.info("grid found!");
-        } else {
-            AppliedAmmoBox.LOGGER.info("grid is null!");
-            //return false;
-        }
-
+        //AppliedAmmoBox.LOGGER.info("info from override isAmmoBoxOfGunWithExtra!");
+        if(extra == 0) return true;
 
         if (gun.getItem() instanceof IGun iGun && ammoBox.getItem() instanceof IAmmoBox iAmmoBox) {
-            if (isAllTypeCreative(ammoBox)) {
-                return true;
+            IGrid grid = getGrid(ammoBox, player);
+            if(grid == null) {
+                AppliedAmmoBox.LOGGER.info("no grid!");
+                return false;
             }
-            ResourceLocation ammoId = iAmmoBox.getAmmoId(ammoBox);
+
+            ResourceLocation gunId = iGun.getGunId(gun);
+            ResourceLocation ammoId = TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId()).orElse(DefaultAssets.EMPTY_AMMO_ID);
             if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
                 return false;
             }
-            ResourceLocation gunId = iGun.getGunId(gun);
-            return TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId().equals(ammoId)).orElse(false);
+            ItemStack ammoStack = AmmoItemBuilder.create().setId(ammoId).build();
+
+            AEKey what = AEItemKey.of(ammoStack);
+
+            if(what != null) {
+                return true;
+            }
         }
         return false;
     }
@@ -94,18 +95,11 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     @Override
     public int getAmmoCountWithExtra(IAmmoBox ammoBox, ItemStack inventoryItem, int extra) {
         //1秒に一回取得
-        if ((System.currentTimeMillis() - checkAmmoTimestamp) > 1000 || isCountChanged) {
+        if ((System.currentTimeMillis() - checkAmmoTimestamp) > 1000) {
             checkAmmoTimestamp = System.currentTimeMillis();
-            isCountChanged = false;
             ammoCountCache = getAmmoCount(inventoryItem);
         }
         return ammoCountCache;
-    }
-
-    @Override
-    public void setAmmoCount(ItemStack ammoBox, int count) {
-        AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count);
-        isCountChanged = true;
     }
 
     @Override

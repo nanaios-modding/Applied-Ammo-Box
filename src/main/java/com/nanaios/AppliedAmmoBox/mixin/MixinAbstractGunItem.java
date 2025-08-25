@@ -24,12 +24,12 @@ public class MixinAbstractGunItem {
     @Redirect(method = "findAndExtractInventoryAmmo",at= @At(value = "INVOKE", target = "Lcom/tacz/guns/api/item/IAmmoBox;isAmmoBoxOfGun(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z"))
     private boolean redirectIsAmmoBoxOfGun2(IAmmoBox ammoBox, ItemStack gunItem, ItemStack checkAmmoStack) {
         AppliedAmmoBox.LOGGER.info("redirectIsAmmoBoxOfGun2 calling!");
-        return ((IExtraAmmoBox)ammoBox).isAmmoBoxOfGunWithExtra(gunItem,checkAmmoStack,1);
+        return ((IExtraAmmoBox)ammoBox).isAmmoBoxOfGunWithExtra(gunItem,checkAmmoStack,0);
     }
 
     @Redirect(method = "lambda$hasInventoryAmmo$6",at= @At(value = "INVOKE", target = "Lcom/tacz/guns/api/item/IAmmoBox;isAmmoBoxOfGun(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z"))
     private static boolean redirectIsAmmoBoxOfGun3(IAmmoBox ammoBox, ItemStack gunItem, ItemStack checkAmmoStack) {
         AppliedAmmoBox.LOGGER.info("redirectIsAmmoBoxOfGun3 calling!");
-        return ((IExtraAmmoBox)ammoBox).isAmmoBoxOfGunWithExtra(gunItem,checkAmmoStack,1);
+        return ((IExtraAmmoBox)ammoBox).isAmmoBoxOfGunWithExtra(gunItem,checkAmmoStack,0);
     }
 }
