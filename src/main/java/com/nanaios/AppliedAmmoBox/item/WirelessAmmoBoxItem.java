@@ -1,11 +1,14 @@
 package com.nanaios.AppliedAmmoBox.item;
 
+import appeng.api.config.Actionable;
 import appeng.api.features.IGridLinkableHandler;
 import appeng.api.networking.IGrid;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
+import appeng.api.storage.StorageHelper;
 import appeng.core.localization.GuiText;
 import appeng.core.localization.Tooltips;
+import appeng.me.helpers.ChannelPowerSrc;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
@@ -86,6 +89,7 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
             AEKey what = AEItemKey.of(ammoStack);
 
             if(what != null) {
+                StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, stackInteractionSize, source, Actionable.SIMULATE);
                 return true;
             }
         }
