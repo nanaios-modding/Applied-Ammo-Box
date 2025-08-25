@@ -1,6 +1,7 @@
 package com.nanaios.AppliedAmmoBox.item;
 
 import appeng.api.features.IGridLinkableHandler;
+import appeng.api.networking.IGrid;
 import appeng.core.localization.GuiText;
 import appeng.core.localization.Tooltips;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItemDataAccessor,ILinkableItem,IExtraAmmoBox {
@@ -39,15 +41,42 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     private int ammoCountCache = 0;
     private boolean isCountChanged = false;
 
+    private Player player;
+    private Level level;
+
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
     public WirelessAmmoBoxItem() {
         super(new Properties().stacksTo(1));
     }
+    @Override
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
+        super.inventoryTick(stack, level, entity, slotId, isSelected);
+        if (level.isClientSide()) return;
+
+        if(entity instanceof Player p) {
+            this.player = p;
+        }
+        this.level = level;
+
+        stack.getDisplayName();
+    }
 
     @Override
     public boolean isAmmoBoxOfGunWithExtra(ItemStack gun, ItemStack ammoBox, int extra) {
+
         AppliedAmmoBox.LOGGER.info("info from override isAmmoBoxOfGunWithExtra!");
+
+        IGrid grid = getGrid(ammoBox, player);
+
+        if(grid != null) {
+            AppliedAmmoBox.LOGGER.info("grid found!");
+        } else {
+            AppliedAmmoBox.LOGGER.info("grid is null!");
+            //return false;
+        }
+
+
         if (gun.getItem() instanceof IGun iGun && ammoBox.getItem() instanceof IAmmoBox iAmmoBox) {
             if (isAllTypeCreative(ammoBox)) {
                 return true;

@@ -1,6 +1,10 @@
 package com.nanaios.AppliedAmmoBox.item;
 
 import appeng.api.features.IGridLinkableHandler;
+import appeng.api.implementations.blockentities.IWirelessAccessPoint;
+import appeng.api.networking.IGrid;
+import appeng.core.localization.PlayerMessages;
+import appeng.util.Platform;
 import com.mojang.datafixers.util.Pair;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import net.minecraft.Util;
@@ -8,7 +12,10 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 
@@ -27,6 +34,40 @@ public interface ILinkableItem {
         } else {
             return null;
         }
+    }
+
+    default IGrid getGrid(ItemStack item,@Nullable Player sendMessagesTo) {
+        Level level = sendMessagesTo.level();
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return null;
+        }
+
+        GlobalPos linkedPos = getLinkedPosition(item);
+        if (linkedPos == null) {
+            sendMessagesTo.displayClientMessage(PlayerMessages.DeviceNotLinked.text(), true);
+            return null;
+        }
+
+        var linkedLevel = serverLevel.getServer().getLevel(linkedPos.dimension());
+        if (linkedLevel == null) {
+            sendMessagesTo.displayClientMessage(PlayerMessages.LinkedNetworkNotFound.text(), true);
+            return null;
+        }
+
+        //var nn = level.getBlockEntity(linkedPos.pos());
+
+        var be = Platform.getTickingBlockEntity(level, linkedPos.pos());
+
+        if (!(be instanceof IWirelessAccessPoint accessPoint)) {
+            sendMessagesTo.displayClientMessage(PlayerMessages.LinkedNetworkNotFound.text(), true);
+            return null;
+        }
+
+        var grid = accessPoint.getGrid();
+        if (grid == null) {
+            sendMessagesTo.displayClientMessage(PlayerMessages.LinkedNetworkNotFound.text(), true);
+        }
+        return grid;
     }
 
     IGridLinkableHandler getLinkableHandler();
