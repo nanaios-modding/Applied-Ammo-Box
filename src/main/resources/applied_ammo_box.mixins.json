@@ -10,6 +10,7 @@
     "MixinIAmmoBox"
   ],
   "client": [
+    "MixinGunHudOverlay"
   ],
   "injectors": {
     "defaultRequire": 1

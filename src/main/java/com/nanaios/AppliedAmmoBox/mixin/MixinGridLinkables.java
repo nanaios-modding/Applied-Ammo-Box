@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinGridLinkables {
     @Inject(method = "get",at=@At("HEAD"),cancellable = true)
     private static void mixinGridLinkables$get(ItemLike itemLike, CallbackInfoReturnable<IGridLinkableHandler> cir) {
-
         Item itemInMixin = itemLike.asItem();
         if(itemInMixin != null && itemInMixin instanceof ILinkableItem linkable) {
             cir.setReturnValue(linkable.getLinkableHandler());

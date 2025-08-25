@@ -35,6 +35,10 @@ import java.util.Optional;
 
 public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItemDataAccessor,ILinkableItem,IExtraAmmoBox {
 
+    private static long checkAmmoTimestamp = -1L;
+    private int ammoCountCache = 0;
+    private boolean isCountChanged = false;
+
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
     public WirelessAmmoBoxItem() {
@@ -44,28 +48,35 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     @Override
     public boolean isAmmoBoxOfGunWithExtra(ItemStack gun, ItemStack ammoBox, int extra) {
         AppliedAmmoBox.LOGGER.info("info from override isAmmoBoxOfGunWithExtra!");
-        return IExtraAmmoBox.super.isAmmoBoxOfGunWithExtra(gun, ammoBox, extra);
+        if (gun.getItem() instanceof IGun iGun && ammoBox.getItem() instanceof IAmmoBox iAmmoBox) {
+            if (isAllTypeCreative(ammoBox)) {
+                return true;
+            }
+            ResourceLocation ammoId = iAmmoBox.getAmmoId(ammoBox);
+            if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
+                return false;
+            }
+            ResourceLocation gunId = iGun.getGunId(gun);
+            return TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId().equals(ammoId)).orElse(false);
+        }
+        return false;
+    }
+
+    @Override
+    public int getAmmoCountWithExtra(IAmmoBox ammoBox, ItemStack inventoryItem, int extra) {
+        //1秒に一回取得
+        if ((System.currentTimeMillis() - checkAmmoTimestamp) > 1000 || isCountChanged) {
+            checkAmmoTimestamp = System.currentTimeMillis();
+            isCountChanged = false;
+            ammoCountCache = getAmmoCount(inventoryItem);
+        }
+        return ammoCountCache;
     }
 
     @Override
     public void setAmmoCount(ItemStack ammoBox, int count) {
         AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count);
-    }
-
-    @Override
-    public boolean isAmmoBoxOfGun(ItemStack gun, ItemStack ammoBox) {
-        if (gun.getItem() instanceof IGun iGun && ammoBox.getItem() instanceof IAmmoBox iAmmoBox) {
-            ResourceLocation ammoId = iAmmoBox.getAmmoId(ammoBox);
-            if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {return false;}
-            ResourceLocation gunId = iGun.getGunId(gun);
-
-            //WirelessAmmoBoxItem.LOG.info("gunId = {}",gunId);
-            //WirelessAmmoBoxItem.LOG.info("ammoId = {}",ammoId);
-
-            return TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId().equals(ammoId)).orElse(false);
-        }
-        return false;
-        //return AmmoBoxItemDataAccessor.super.isAmmoBoxOfGun(gun, ammoBox);
+        isCountChanged = true;
     }
 
     @Override

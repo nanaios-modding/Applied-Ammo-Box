@@ -29,5 +29,5 @@ public interface ILinkableItem {
         }
     }
 
-    public abstract IGridLinkableHandler getLinkableHandler();
+    IGridLinkableHandler getLinkableHandler();
 }
