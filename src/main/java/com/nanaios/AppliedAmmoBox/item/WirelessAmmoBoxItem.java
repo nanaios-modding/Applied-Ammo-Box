@@ -6,6 +6,7 @@ import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.core.localization.GuiText;
 import appeng.core.localization.Tooltips;
+import appeng.helpers.WirelessTerminalMenuHost;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
@@ -33,6 +34,8 @@ import org.jetbrains.annotations.NotNull;
 
 
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
@@ -130,6 +133,21 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
             }
         }
         return false;
+    }
+
+    private void testNN(){
+        try {
+            Method m = WirelessTerminalMenuHost.class.getDeclaredMethod("rangeCheck");
+            m.setAccessible(true);
+            m.invoke(this);
+
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     private void playInsertSound(Entity entity) {
