@@ -48,6 +48,15 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     }
 
     @Override
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
+        super.inventoryTick(stack, level, entity, slotId, isSelected);
+        if((System.currentTimeMillis() - checkAmmoTimestamp) > 1000) {
+            checkAmmoTimestamp = System.currentTimeMillis();
+            ammoCountCache = getAmmoCount(stack);
+        }
+    }
+
+    @Override
     public boolean isAmmoBoxOfGun(ItemStack gun, ItemStack ammoBox) {
         return false;
     }
@@ -79,16 +88,6 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
             }
         }
         return false;
-    }
-
-    @Override
-    public int getAmmoCountWithExtra(IAmmoBox ammoBox, ItemStack inventoryItem, int extra) {
-        //1秒に一回取得
-        if ((System.currentTimeMillis() - checkAmmoTimestamp) > 1000) {
-            checkAmmoTimestamp = System.currentTimeMillis();
-            ammoCountCache = getAmmoCount(inventoryItem);
-        }
-        return ammoCountCache;
     }
 
     @Override

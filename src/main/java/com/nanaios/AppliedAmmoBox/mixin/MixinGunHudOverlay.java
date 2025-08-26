@@ -10,8 +10,4 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(value = GunHudOverlay.class,remap = false)
 public class MixinGunHudOverlay {
-    @Redirect(method = "handleInventoryAmmo", at=@At(value = "INVOKE", target = "Lcom/tacz/guns/api/item/IAmmoBox;getAmmoCount(Lnet/minecraft/world/item/ItemStack;)I"))
-    private static int mixinGetAmmoCount(IAmmoBox instance, ItemStack itemStack) {
-        return  ((IExtraAmmoBox)instance).getAmmoCountWithExtra(instance,itemStack,0);
-    }
 }
