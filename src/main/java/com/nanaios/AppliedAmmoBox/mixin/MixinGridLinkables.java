@@ -3,7 +3,7 @@ package com.nanaios.AppliedAmmoBox.mixin;
 import appeng.api.features.GridLinkables;
 import appeng.api.features.IGridLinkableHandler;
 import com.nanaios.AppliedAmmoBox.item.ILinkableItem;
-import com.nanaios.AppliedAmmoBox.item.WirelessAmmoBoxItem;
+import com.nanaios.AppliedAmmoBox.item.LinkableItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import org.spongepowered.asm.mixin.Mixin;

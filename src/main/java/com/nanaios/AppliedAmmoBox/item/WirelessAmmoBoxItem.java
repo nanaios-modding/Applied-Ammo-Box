@@ -1,14 +1,11 @@
 package com.nanaios.AppliedAmmoBox.item;
 
-import appeng.api.config.Actionable;
 import appeng.api.features.IGridLinkableHandler;
 import appeng.api.networking.IGrid;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
-import appeng.api.storage.StorageHelper;
 import appeng.core.localization.GuiText;
 import appeng.core.localization.Tooltips;
-import appeng.me.helpers.ChannelPowerSrc;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
@@ -18,11 +15,8 @@ import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
 import com.tacz.guns.config.sync.SyncConfig;
-import com.tacz.guns.init.ModItems;
 import com.tacz.guns.inventory.tooltip.AmmoBoxTooltip;
-import com.tacz.guns.item.AmmoItem;
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -34,37 +28,23 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
-public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItemDataAccessor,ILinkableItem,IExtraAmmoBox {
+public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherItem, AmmoBoxItemDataAccessor,IExtraAmmoBox {
 
     private static long checkAmmoTimestamp = -1L;
     private int ammoCountCache = 0;
-    private boolean isCountChanged = false;
-
-    private Player player;
 
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
     public WirelessAmmoBoxItem() {
         super(new Properties().stacksTo(1));
-    }
-    @Override
-    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
-        super.inventoryTick(stack, level, entity, slotId, isSelected);
-        if (level.isClientSide()) return;
-        if(entity instanceof Player p) {
-            this.player = p;
-        }
     }
 
     @Override
@@ -73,7 +53,7 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
         if(extra == 0) return true;
 
         if (gun.getItem() instanceof IGun iGun && ammoBox.getItem() instanceof IAmmoBox iAmmoBox) {
-            IGrid grid = getGrid(ammoBox, player);
+            IGrid grid = getGrid(ammoBox);
             if(grid == null) {
                 AppliedAmmoBox.LOGGER.info("no grid!");
                 return false;
@@ -89,7 +69,7 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
             AEKey what = AEItemKey.of(ammoStack);
 
             if(what != null) {
-                StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, stackInteractionSize, source, Actionable.SIMULATE);
+                //StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, 1, source, Actionable.SIMULATE);
                 return true;
             }
         }
@@ -192,7 +172,7 @@ public class WirelessAmmoBoxItem extends Item implements DyeableLeatherItem, Amm
     }
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level pLevel, List<Component> components, @NotNull TooltipFlag isAdvanced) {
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level pLevel, @NotNull List<Component> components, @NotNull TooltipFlag isAdvanced) {
         if (getLinkedPosition(stack) == null) {
             components.add(Tooltips.of(GuiText.Unlinked, Tooltips.RED));
         } else {
