@@ -48,6 +48,11 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     }
 
     @Override
+    public boolean isAmmoBoxOfGun(ItemStack gun, ItemStack ammoBox) {
+        return false;
+    }
+
+    @Override
     public boolean isAmmoBoxOfGunWithExtra(ItemStack gun, ItemStack ammoBox, int extra) {
         //AppliedAmmoBox.LOGGER.info("info from override isAmmoBoxOfGunWithExtra!");
         if(extra == 0) return true;
