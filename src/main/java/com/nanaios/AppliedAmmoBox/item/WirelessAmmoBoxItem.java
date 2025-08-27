@@ -264,8 +264,6 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         } else {
             components.add(Tooltips.of(GuiText.Linked, Tooltips.GREEN));
         }
-        //components.add(Component.translatable("tooltip.tacz.ammo_box.usage.deposit").withStyle(ChatFormatting.GRAY));
-        //components.add(Component.translatable("tooltip.tacz.ammo_box.usage.remove").withStyle(ChatFormatting.GRAY));
     }
 
     @Override
