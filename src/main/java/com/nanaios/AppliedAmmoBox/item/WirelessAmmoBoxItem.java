@@ -27,6 +27,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -42,7 +43,6 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
 
     private static long checkAmmoTimestamp = -1L;
     private int MeAmmoCountCache = 0;
-    private int stackAmmoCount = 0;
 
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
@@ -82,11 +82,8 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     */
     @Override
     public int getAmmoCountCache(ItemStack ammoBox) {
-        CompoundTag tag = ammoBox.getOrCreateTag();
-        if (tag.contains(AMMO_COUNT_TAG, Tag.TAG_INT)) {
-            return tag.getInt(AMMO_COUNT_TAG);
-        }
-        return 0;
+
+        return  AmmoBoxItemDataAccessor.super.getAmmoCount(ammoBox);
     }
 
     @Override
@@ -119,8 +116,6 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         if (gun.getItem() instanceof IGun iGun && ammoBox.getItem() instanceof IAmmoBox iAmmoBox) {
             if(player == null) return false;
 
-            AppliedAmmoBox.LOGGER.info("now ammo = {}",stackAmmoCount);
-
             //gridを取得
             IGrid grid = getGrid(ammoBox);
             if(grid == null) {
@@ -151,41 +146,12 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
                 return false;
             }
 
-            //リロードを途中でキャンセルした場合などの時、内部に弾丸が残る可能性があるので確認
-            if(getAmmoCountCache(ammoBox) > 0 && !getAmmoId(ammoBox).equals(ammoId)) {
-                //キャッシュから読み込み
-                int cachedCount = getAmmoCountCache(ammoBox);
-                ResourceLocation cachedAmmoId = getAmmoId(ammoBox);
-
-                //keyを生成
-                ItemStack cachedAmmoStack = AmmoItemBuilder.create().setId(cachedAmmoId).build();
-                AEKey key = AEItemKey.of(cachedAmmoStack);
-
-                if(key == null) return false;
-
-                //搬入可能か調査
-                int amount = Math.toIntExact(StorageHelper.poweredInsert(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, cachedCount, source, Actionable.SIMULATE));
-
-                if(amount == 0) return false;
-
-                //倉庫に搬入
-                int insertable = Math.min(amount,cachedCount);
-                insertable =  (int)StorageHelper.poweredInsert(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, insertable, source, Actionable.MODULATE);
-                cachedCount -= insertable;
-
-                //内部にセット
-                setAmmoCount(ammoBox,cachedCount);
-                if(cachedCount != 0) return false;
-            }
-
             //必要な弾丸数を計算
             ModernKineticGunScriptAPI api = new ModernKineticGunScriptAPI();
             api.setItemStack(gun);
             api.setShooter(player);
             int needAmmoCount = api.getNeededAmmoAmount();
 
-            //現在保存されている弾丸の個数を引く
-            needAmmoCount -= getAmmoCountCache(ammoBox);
             if(needAmmoCount == 0) return true;
 
             //実際の弾丸のスタックを取得
@@ -193,21 +159,35 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
             AEKey what = AEItemKey.of(ammoStack);
 
             if(what != null && needAmmoCount > 0) {
+                MinecraftServer server = player.getServer();
+                if(server == null) return false;
+
+
                 //倉庫から搬入できるか調査
                 int amount = (int)StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, needAmmoCount, source, Actionable.SIMULATE);
+
                 // AppliedAmmoBox.LOGGER.info("amount = {}",amount);
-                if (amount <= 0) return getAmmoCountCache(ammoBox) > 0;
+                if (amount <= 0) {
+                    if(server.isSameThread()) {
+                        return getAmmoCountCache(ammoBox) > 0;
+                    }else {
+                        return false;
+                    }
+                }
 
-                //倉庫から搬入
-                amount = (int)StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, amount, source, Actionable.MODULATE);
+                if(server.isSameThread()) {
 
-                //弾薬箱にデータをセット
-                setAmmoCount(ammoBox,getAmmoCountCache(ammoBox) + amount);
-                setAmmoId(ammoBox,ammoId);
+                    if(needAmmoCount < getAmmoCountCache(ammoBox)) return true;
 
-                stackAmmoCount = getAmmoCountCache(ammoBox);
-                AppliedAmmoBox.LOGGER.info("now ammo = {}",stackAmmoCount);
+                    int need = Math.min(amount,needAmmoCount - getAmmoCountCache(ammoBox));
 
+                    //倉庫から搬入
+                    amount = (int)StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, need, source, Actionable.MODULATE);
+
+                    //弾薬箱にデータをセット
+                    setAmmoCount(ammoBox,getAmmoCountCache(ammoBox) + amount);
+                    setAmmoId(ammoBox,ammoId);
+                }
                 return true;
             }
         }
@@ -251,7 +231,7 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         return false;
     } */
 
-    private void playInsertSound(Entity entity) {
+    /* private void playInsertSound(Entity entity) {
         entity.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
     }
 
@@ -275,23 +255,6 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     @Override
     public int getBarColor(@NotNull ItemStack stack) {
         return Mth.hsvToRgb(1 / 3f, 1.0F, 1.0F);
-    }
-
-    /* @Override
-     public @NotNull Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
-        if (!(stack.getItem() instanceof WirelessAmmoBoxItem iAmmoBox)) {
-            return Optional.empty();
-        }
-        ResourceLocation ammoId = iAmmoBox.getAmmoId(stack);
-        if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
-            return Optional.empty();
-        }
-        int ammoCount = iAmmoBox.getAmmoCountCache(stack);
-        if (ammoCount <= 0) {
-            return Optional.empty();
-        }
-        ItemStack ammoStack = AmmoItemBuilder.create().setId(ammoId).build();
-        return Optional.of(new AmmoBoxTooltip(stack, ammoStack, ammoCount));
     } */
 
     @Override
@@ -301,9 +264,8 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         } else {
             components.add(Tooltips.of(GuiText.Linked, Tooltips.GREEN));
         }
-
-        components.add(Component.translatable("tooltip.tacz.ammo_box.usage.deposit").withStyle(ChatFormatting.GRAY));
-        components.add(Component.translatable("tooltip.tacz.ammo_box.usage.remove").withStyle(ChatFormatting.GRAY));
+        //components.add(Component.translatable("tooltip.tacz.ammo_box.usage.deposit").withStyle(ChatFormatting.GRAY));
+        //components.add(Component.translatable("tooltip.tacz.ammo_box.usage.remove").withStyle(ChatFormatting.GRAY));
     }
 
     @Override

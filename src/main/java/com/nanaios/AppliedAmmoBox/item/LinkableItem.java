@@ -6,6 +6,7 @@ import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.blockentity.networking.WirelessAccessPointBlockEntity;
 import appeng.core.localization.PlayerMessages;
+import appeng.util.Platform;
 import com.mojang.datafixers.util.Pair;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import net.minecraft.Util;
