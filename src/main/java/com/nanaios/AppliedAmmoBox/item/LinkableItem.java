@@ -152,12 +152,6 @@ public abstract class LinkableItem extends Item implements ILinkableItem{
         }
 
         this.targetGrid = grid;
-
-        if(!rangeCheck()) {
-            player.displayClientMessage(PlayerMessages.OutOfRange.text(), true);
-            return null;
-        }
-
         return grid;
     }
 

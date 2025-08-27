@@ -9,6 +9,7 @@ import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.storage.StorageHelper;
 import appeng.core.localization.GuiText;
+import appeng.core.localization.PlayerMessages;
 import appeng.core.localization.Tooltips;
 import appeng.helpers.WirelessTerminalMenuHost;
 import appeng.me.helpers.ChannelPowerSrc;
@@ -62,8 +63,25 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         if((System.currentTimeMillis() - checkAmmoTimestamp) > 1000) {
             checkAmmoTimestamp = System.currentTimeMillis();
-            ammoCountCache = getAmmoCount(stack);
+            ammoCountCache = getNowAmmoCount(stack);
         }
+    }
+
+    public int getNowAmmoCount(ItemStack ammoBox) {
+        IGrid grid = getGrid(ammoBox);
+        if(grid == null) {
+            return 0;
+        }
+        if(!rangeCheck()) {
+            return 0;
+        }
+
+        return 0;
+        //long amount = StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, needAmmoCount, source, Actionable.SIMULATE);
+    }
+
+    public int getAmmoCountCache(ItemStack ammoBox) {
+        return AmmoBoxItemDataAccessor.super.getAmmoCount(ammoBox);
     }
 
     @Override
@@ -82,45 +100,53 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         if(extra == 0) return true;
 
         if (gun.getItem() instanceof IGun iGun && ammoBox.getItem() instanceof IAmmoBox iAmmoBox) {
-            IGrid grid = getGrid(ammoBox);
-            if(grid == null) {
-                AppliedAmmoBox.LOGGER.info("no grid!");
-                return false;
-            }
-            IGridNode node = getActionableNode();
-            if(node == null) {
-                AppliedAmmoBox.LOGGER.info("no node!");
-                return false;
-            }
+            if(player == null) return false;
 
-            IActionSource source = new PlayerSource(player);
-
+            //銃の弾丸タイプがEMPTYじゃないことを確認
             ResourceLocation gunId = iGun.getGunId(gun);
             ResourceLocation ammoId = TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId()).orElse(DefaultAssets.EMPTY_AMMO_ID);
             if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
                 return false;
             }
 
-            ModernKineticGunScriptAPI api = new ModernKineticGunScriptAPI();
-
-            api.setItemStack(gun);
-            api.setShooter(player);
-
-            int needAmmoCount = api.getNeededAmmoAmount();
-
+            //実際の弾丸のスタックを取得
             ItemStack ammoStack = AmmoItemBuilder.create().setId(ammoId).build();
 
+            //必要な弾丸数を計算
+            ModernKineticGunScriptAPI api = new ModernKineticGunScriptAPI();
+            api.setItemStack(gun);
+            api.setShooter(player);
+            int needAmmoCount = api.getNeededAmmoAmount();
+
+            //gridを取得
+            IGrid grid = getGrid(ammoBox);
+            if(grid == null) {
+                AppliedAmmoBox.LOGGER.info("no grid!");
+                return false;
+            }
+
+            //有効なアクセスポイントが範囲内に存在するかチェック
+            if(!rangeCheck()) {
+                player.displayClientMessage(PlayerMessages.OutOfRange.text(), true);
+                return false;
+            }
+
+            //nodeを取得
+            IGridNode node = getActionableNode();
+            if(node == null) {
+                AppliedAmmoBox.LOGGER.info("no node!");
+                return false;
+            }
+
+            //その他の準備
+            IActionSource source = new PlayerSource(player);
             AEKey what = AEItemKey.of(ammoStack);
 
             if(what != null && needAmmoCount > 0) {
                 long amount = StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, needAmmoCount, source, Actionable.SIMULATE);
-
-                AppliedAmmoBox.LOGGER.info("amount = {}",amount);
-
+                // AppliedAmmoBox.LOGGER.info("amount = {}",amount);
                 if (amount <= 0) return false;
-
                 StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, amount, source, Actionable.MODULATE);
-
                 return true;
             }
         }
@@ -195,7 +221,7 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         return Mth.hsvToRgb(1 / 3f, 1.0F, 1.0F);
     }
 
-    @Override
+    /* @Override
     public @NotNull Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
         if (!(stack.getItem() instanceof IAmmoBox iAmmoBox)) {
             return Optional.empty();
@@ -210,7 +236,7 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         }
         ItemStack ammoStack = AmmoItemBuilder.create().setId(ammoId).build();
         return Optional.of(new AmmoBoxTooltip(stack, ammoStack, ammoCount));
-    }
+    } */
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level pLevel, @NotNull List<Component> components, @NotNull TooltipFlag isAdvanced) {

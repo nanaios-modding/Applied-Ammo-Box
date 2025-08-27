@@ -11,8 +11,4 @@ public interface IExtraAmmoBox{
         }
         return false;
     }
-
-    default int getAmmoCountWithExtra(IAmmoBox ammoBox, ItemStack inventoryItem,int extra) {
-        return ammoBox.getAmmoCount(inventoryItem);
-    }
 }
