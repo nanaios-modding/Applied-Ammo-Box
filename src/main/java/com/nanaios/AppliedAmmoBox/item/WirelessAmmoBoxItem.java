@@ -23,6 +23,8 @@ import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
 import com.tacz.guns.config.sync.SyncConfig;
 import com.tacz.guns.item.ModernKineticGunScriptAPI;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -39,7 +41,8 @@ import java.util.List;
 public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherItem, AmmoBoxItemDataAccessor,IExtraAmmoBox {
 
     private static long checkAmmoTimestamp = -1L;
-    private int ammoCountCache = 0;
+    private int MeAmmoCountCache = 0;
+    private int stackAmmoCount = 0;
 
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
@@ -52,7 +55,7 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         if((System.currentTimeMillis() - checkAmmoTimestamp) > 1000) {
             checkAmmoTimestamp = System.currentTimeMillis();
-            ammoCountCache = getNowAmmoCount(stack);
+            MeAmmoCountCache = getNowAmmoCount(stack);
         }
     }
 
@@ -79,12 +82,16 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     */
     @Override
     public int getAmmoCountCache(ItemStack ammoBox) {
-        return AmmoBoxItemDataAccessor.super.getAmmoCount(ammoBox);
+        CompoundTag tag = ammoBox.getOrCreateTag();
+        if (tag.contains(AMMO_COUNT_TAG, Tag.TAG_INT)) {
+            return tag.getInt(AMMO_COUNT_TAG);
+        }
+        return 0;
     }
 
     @Override
     public int getAmmoCount(ItemStack ammoBox) {
-        return ammoCountCache;
+        return MeAmmoCountCache;
     }
 
     @Override
@@ -107,8 +114,12 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         //AppliedAmmoBox.LOGGER.info("info from override isAmmoBoxOfGunWithExtra!");
         if(extra == 0) return true;
 
+
+
         if (gun.getItem() instanceof IGun iGun && ammoBox.getItem() instanceof IAmmoBox iAmmoBox) {
             if(player == null) return false;
+
+            AppliedAmmoBox.LOGGER.info("now ammo = {}",stackAmmoCount);
 
             //gridを取得
             IGrid grid = getGrid(ammoBox);
@@ -193,6 +204,9 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
                 //弾薬箱にデータをセット
                 setAmmoCount(ammoBox,getAmmoCountCache(ammoBox) + amount);
                 setAmmoId(ammoBox,ammoId);
+
+                stackAmmoCount = getAmmoCountCache(ammoBox);
+                AppliedAmmoBox.LOGGER.info("now ammo = {}",stackAmmoCount);
 
                 return true;
             }
