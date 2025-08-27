@@ -11,19 +11,16 @@ import appeng.api.storage.StorageHelper;
 import appeng.core.localization.GuiText;
 import appeng.core.localization.PlayerMessages;
 import appeng.core.localization.Tooltips;
-import appeng.helpers.WirelessTerminalMenuHost;
 import appeng.me.helpers.ChannelPowerSrc;
 import appeng.me.helpers.PlayerSource;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
-import com.tacz.guns.api.item.IAmmo;
 import com.tacz.guns.api.item.IAmmoBox;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
 import com.tacz.guns.config.sync.SyncConfig;
-import com.tacz.guns.inventory.tooltip.AmmoBoxTooltip;
 import com.tacz.guns.item.ModernKineticGunScriptAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -31,21 +28,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.SlotAccess;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickAction;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Optional;
 
 public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherItem, AmmoBoxItemDataAccessor,IExtraAmmoBox {
 
@@ -67,6 +56,10 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         }
     }
 
+    public void setNowGun(ItemStack gun) {
+
+    }
+
     public int getNowAmmoCount(ItemStack ammoBox) {
         IGrid grid = getGrid(ammoBox);
         if(grid == null) {
@@ -80,6 +73,11 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         //long amount = StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, needAmmoCount, source, Actionable.SIMULATE);
     }
 
+    /** 内部的に保存された弾丸の個数を取得
+    *
+    *
+    */
+    @Override
     public int getAmmoCountCache(ItemStack ammoBox) {
         return AmmoBoxItemDataAccessor.super.getAmmoCount(ammoBox);
     }
@@ -87,6 +85,16 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     @Override
     public int getAmmoCount(ItemStack ammoBox) {
         return ammoCountCache;
+    }
+
+    @Override
+    public void setAmmoCount(ItemStack ammoBox, int count) {
+        AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count);
+
+        //countが0ならデータをリセット
+        if(count == 0) {
+            setAmmoId(ammoBox,DefaultAssets.EMPTY_AMMO_ID);
+        }
     }
 
     @Override
@@ -101,22 +109,6 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
 
         if (gun.getItem() instanceof IGun iGun && ammoBox.getItem() instanceof IAmmoBox iAmmoBox) {
             if(player == null) return false;
-
-            //銃の弾丸タイプがEMPTYじゃないことを確認
-            ResourceLocation gunId = iGun.getGunId(gun);
-            ResourceLocation ammoId = TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId()).orElse(DefaultAssets.EMPTY_AMMO_ID);
-            if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
-                return false;
-            }
-
-            //実際の弾丸のスタックを取得
-            ItemStack ammoStack = AmmoItemBuilder.create().setId(ammoId).build();
-
-            //必要な弾丸数を計算
-            ModernKineticGunScriptAPI api = new ModernKineticGunScriptAPI();
-            api.setItemStack(gun);
-            api.setShooter(player);
-            int needAmmoCount = api.getNeededAmmoAmount();
 
             //gridを取得
             IGrid grid = getGrid(ammoBox);
@@ -140,25 +132,75 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
 
             //その他の準備
             IActionSource source = new PlayerSource(player);
+
+            //銃の弾丸タイプがEMPTYじゃないことを確認
+            ResourceLocation gunId = iGun.getGunId(gun);
+            ResourceLocation ammoId = TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId()).orElse(DefaultAssets.EMPTY_AMMO_ID);
+            if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
+                return false;
+            }
+
+            //リロードを途中でキャンセルした場合などの時、内部に弾丸が残る可能性があるので確認
+            if(getAmmoCountCache(ammoBox) > 0 && !getAmmoId(ammoBox).equals(ammoId)) {
+                //キャッシュから読み込み
+                int cachedCount = getAmmoCountCache(ammoBox);
+                ResourceLocation cachedAmmoId = getAmmoId(ammoBox);
+
+                //keyを生成
+                ItemStack cachedAmmoStack = AmmoItemBuilder.create().setId(cachedAmmoId).build();
+                AEKey key = AEItemKey.of(cachedAmmoStack);
+
+                if(key == null) return false;
+
+                //搬入可能か調査
+                int amount = Math.toIntExact(StorageHelper.poweredInsert(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, cachedCount, source, Actionable.SIMULATE));
+
+                if(amount == 0) return false;
+
+                //倉庫に搬入
+                int insertable = Math.min(amount,cachedCount);
+                insertable =  (int)StorageHelper.poweredInsert(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, insertable, source, Actionable.MODULATE);
+                cachedCount -= insertable;
+
+                //内部にセット
+                setAmmoCount(ammoBox,cachedCount);
+                if(cachedCount != 0) return false;
+            }
+
+            //必要な弾丸数を計算
+            ModernKineticGunScriptAPI api = new ModernKineticGunScriptAPI();
+            api.setItemStack(gun);
+            api.setShooter(player);
+            int needAmmoCount = api.getNeededAmmoAmount();
+
+            //現在保存されている弾丸の個数を引く
+            needAmmoCount -= getAmmoCountCache(ammoBox);
+            if(needAmmoCount == 0) return true;
+
+            //実際の弾丸のスタックを取得
+            ItemStack ammoStack = AmmoItemBuilder.create().setId(ammoId).build();
             AEKey what = AEItemKey.of(ammoStack);
 
             if(what != null && needAmmoCount > 0) {
-                long amount = StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, needAmmoCount, source, Actionable.SIMULATE);
+                //倉庫から搬入できるか調査
+                int amount = (int)StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, needAmmoCount, source, Actionable.SIMULATE);
                 // AppliedAmmoBox.LOGGER.info("amount = {}",amount);
-                if (amount <= 0) return false;
-                StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, amount, source, Actionable.MODULATE);
+                if (amount <= 0) return getAmmoCountCache(ammoBox) > 0;
+
+                //倉庫から搬入
+                amount = (int)StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, amount, source, Actionable.MODULATE);
+
+                //弾薬箱にデータをセット
+                setAmmoCount(ammoBox,getAmmoCountCache(ammoBox) + amount);
+                setAmmoId(ammoBox,ammoId);
+
                 return true;
             }
         }
         return false;
     }
 
-    @Override
-    public boolean overrideOtherStackedOnMe(@NotNull ItemStack stack, @NotNull ItemStack pOther, @NotNull Slot slot, @NotNull ClickAction action, @NotNull Player player, @NotNull SlotAccess access) {
-        return super.overrideOtherStackedOnMe(stack, pOther, slot, action, player, access);
-    }
-
-    @Override
+    /* @Override
     public boolean overrideStackedOnOther(@NotNull ItemStack ammoBox, @NotNull Slot slot, @NotNull ClickAction action, @NotNull Player player) {
         // 右击
         if (action == ClickAction.SECONDARY) {
@@ -193,7 +235,7 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
             }
         }
         return false;
-    }
+    } */
 
     private void playInsertSound(Entity entity) {
         entity.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
@@ -222,15 +264,15 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     }
 
     /* @Override
-    public @NotNull Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
-        if (!(stack.getItem() instanceof IAmmoBox iAmmoBox)) {
+     public @NotNull Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
+        if (!(stack.getItem() instanceof WirelessAmmoBoxItem iAmmoBox)) {
             return Optional.empty();
         }
         ResourceLocation ammoId = iAmmoBox.getAmmoId(stack);
         if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
             return Optional.empty();
         }
-        int ammoCount = iAmmoBox.getAmmoCount(stack);
+        int ammoCount = iAmmoBox.getAmmoCountCache(stack);
         if (ammoCount <= 0) {
             return Optional.empty();
         }

@@ -1,5 +1,6 @@
 package com.nanaios.AppliedAmmoBox.mixin;
 
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.nanaios.AppliedAmmoBox.item.IExtraAmmoBox;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -26,20 +27,19 @@ public class MixinAbstractGunItem {
     }
 
     @Inject(method = "findAndExtractInventoryAmmo",at= @At(value = "INVOKE", target = "Lnet/minecraftforge/items/IItemHandler;getStackInSlot(I)Lnet/minecraft/world/item/ItemStack;"),cancellable = true)
-    private void mixinAbstractGunItem$findAndExtractInventoryAmmo(IItemHandler itemHandler, ItemStack gunItem, int needAmmoCount, CallbackInfoReturnable<Integer> cir,@Local(ordinal = 0)int cnt,@Local(ordinal = 1)int i) {
-        AppliedAmmoBox.LOGGER.info("redirectIsAmmoBoxOfGun2 calling!");
-
-        /* ItemStack checkAmmoStackInMixin  = itemHandler.getStackInSlot(i);
+    private void mixinAbstractGunItem$findAndExtractInventoryAmmo(IItemHandler itemHandler, ItemStack gunItem, int needAmmoCount, CallbackInfoReturnable<Integer> cir, @Local(ordinal = 1) LocalIntRef cnt, @Local(ordinal = 2)int i) {
+        //AppliedAmmoBox.LOGGER.info("redirectIsAmmoBoxOfGun2 calling!");
+        ItemStack checkAmmoStackInMixin  = itemHandler.getStackInSlot(i);
         if (checkAmmoStackInMixin.getItem() instanceof IExtraAmmoBox iExAmmoBox && iExAmmoBox.isAmmoBoxOfGunWithExtra(gunItem, checkAmmoStackInMixin,1)) {
             IAmmoBox iAmmoBox = (IAmmoBox) iExAmmoBox;
-            int boxAmmoCount = iAmmoBox.getAmmoCount(checkAmmoStackInMixin);
-            int extractCount = Math.min(boxAmmoCount, cnt);
+            int boxAmmoCount = iExAmmoBox.getAmmoCountCache(checkAmmoStackInMixin);
+            int extractCount = Math.min(boxAmmoCount, cnt.get());
             int remainCount = boxAmmoCount - extractCount;
             iAmmoBox.setAmmoCount(checkAmmoStackInMixin, remainCount);
-            cnt = cnt - extractCount;
-            if (cnt <= 0) {
+            cnt.set(cnt.get() - extractCount);
+            if (cnt.get() <= 0) {
                 cir.setReturnValue(needAmmoCount);
             }
-        } */
+        }
     }
 }
