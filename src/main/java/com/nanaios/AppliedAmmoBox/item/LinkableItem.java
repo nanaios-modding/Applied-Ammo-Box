@@ -3,6 +3,7 @@ package com.nanaios.AppliedAmmoBox.item;
 import appeng.api.features.IGridLinkableHandler;
 import appeng.api.implementations.blockentities.IWirelessAccessPoint;
 import appeng.api.networking.IGrid;
+import appeng.api.networking.IGridNode;
 import appeng.blockentity.networking.WirelessAccessPointBlockEntity;
 import appeng.core.localization.PlayerMessages;
 import com.mojang.datafixers.util.Pair;
@@ -103,6 +104,14 @@ public abstract class LinkableItem extends Item implements ILinkableItem{
         }
 
         return Double.MAX_VALUE;
+    }
+
+    public IGridNode getActionableNode() {
+        this.rangeCheck();
+        if (this.myWap != null) {
+            return this.myWap.getActionableNode();
+        }
+        return null;
     }
 
     public IGrid getGrid(ItemStack item) {

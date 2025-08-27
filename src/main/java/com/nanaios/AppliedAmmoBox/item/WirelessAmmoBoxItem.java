@@ -1,12 +1,18 @@
 package com.nanaios.AppliedAmmoBox.item;
 
+import appeng.api.config.Actionable;
 import appeng.api.features.IGridLinkableHandler;
 import appeng.api.networking.IGrid;
+import appeng.api.networking.IGridNode;
+import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
+import appeng.api.storage.StorageHelper;
 import appeng.core.localization.GuiText;
 import appeng.core.localization.Tooltips;
 import appeng.helpers.WirelessTerminalMenuHost;
+import appeng.me.helpers.ChannelPowerSrc;
+import appeng.me.helpers.PlayerSource;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
@@ -17,6 +23,7 @@ import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
 import com.tacz.guns.config.sync.SyncConfig;
 import com.tacz.guns.inventory.tooltip.AmmoBoxTooltip;
+import com.tacz.guns.item.ModernKineticGunScriptAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -60,6 +67,11 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     }
 
     @Override
+    public int getAmmoCount(ItemStack ammoBox) {
+        return ammoCountCache;
+    }
+
+    @Override
     public boolean isAmmoBoxOfGun(ItemStack gun, ItemStack ammoBox) {
         return false;
     }
@@ -75,18 +87,40 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
                 AppliedAmmoBox.LOGGER.info("no grid!");
                 return false;
             }
+            IGridNode node = getActionableNode();
+            if(node == null) {
+                AppliedAmmoBox.LOGGER.info("no node!");
+                return false;
+            }
+
+            IActionSource source = new PlayerSource(player);
 
             ResourceLocation gunId = iGun.getGunId(gun);
             ResourceLocation ammoId = TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId()).orElse(DefaultAssets.EMPTY_AMMO_ID);
             if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
                 return false;
             }
+
+            ModernKineticGunScriptAPI api = new ModernKineticGunScriptAPI();
+
+            api.setItemStack(gun);
+            api.setShooter(player);
+
+            int needAmmoCount = api.getNeededAmmoAmount();
+
             ItemStack ammoStack = AmmoItemBuilder.create().setId(ammoId).build();
 
             AEKey what = AEItemKey.of(ammoStack);
 
-            if(what != null) {
-                //StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, 1, source, Actionable.SIMULATE);
+            if(what != null && needAmmoCount > 0) {
+                long amount = StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, needAmmoCount, source, Actionable.SIMULATE);
+
+                AppliedAmmoBox.LOGGER.info("amount = {}",amount);
+
+                if (amount <= 0) return false;
+
+                StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, amount, source, Actionable.MODULATE);
+
                 return true;
             }
         }
@@ -133,21 +167,6 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
             }
         }
         return false;
-    }
-
-    private void testNN(){
-        try {
-            Method m = WirelessTerminalMenuHost.class.getDeclaredMethod("rangeCheck");
-            m.setAccessible(true);
-            m.invoke(this);
-
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
     }
 
     private void playInsertSound(Entity entity) {
