@@ -20,16 +20,10 @@ import com.tacz.guns.api.item.IAmmoBox;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
-import com.tacz.guns.config.sync.SyncConfig;
 import com.tacz.guns.item.ModernKineticGunScriptAPI;
-import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
@@ -43,7 +37,8 @@ import java.util.List;
 public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherItem, AmmoBoxItemDataAccessor,IExtraAmmoBox {
 
     private static long checkAmmoTimestamp = -1L;
-    private int MeAmmoCountCache = 0;
+    private int meAmmoCountCache = 0;
+    private ItemStack cachedGun = null;
 
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
@@ -56,12 +51,15 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         if((System.currentTimeMillis() - checkAmmoTimestamp) > 1000) {
             checkAmmoTimestamp = System.currentTimeMillis();
-            MeAmmoCountCache = getNowAmmoCount(stack);
+            meAmmoCountCache = getNowAmmoCount(stack);
         }
     }
 
+    @Override
     public void setNowGun(ItemStack gun) {
-
+        if(gun.getItem() instanceof IGun) {
+            cachedGun=gun;
+        }
     }
 
     public int getNowAmmoCount(ItemStack ammoBox) {
@@ -89,7 +87,7 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
 
     @Override
     public int getAmmoCount(ItemStack ammoBox) {
-        return MeAmmoCountCache;
+        return meAmmoCountCache;
     }
 
     @Override
@@ -219,49 +217,13 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
                     //弾薬箱にデータをセット
                     setAmmoCount(ammoBox,getAmmoCountCache(ammoBox) + amount);
                     setAmmoId(ammoBox,ammoId);
+                    meAmmoCountCache = getNowAmmoCount(ammoBox);
                 }
                 return true;
             }
         }
         return false;
     }
-
-    /* @Override
-    public boolean overrideStackedOnOther(@NotNull ItemStack ammoBox, @NotNull Slot slot, @NotNull ClickAction action, @NotNull Player player) {
-        // 右击
-        if (action == ClickAction.SECONDARY) {
-            // 点击的格子
-            ItemStack slotItem = slot.getItem();
-            ResourceLocation boxAmmoId = this.getAmmoId(ammoBox);
-
-            // 如果是子弹
-            if (slotItem.getItem() instanceof IAmmo iAmmo) {
-                ResourceLocation slotAmmoId = iAmmo.getAmmoId(slotItem);
-                // 格子里的子弹 ID 不对，不能放
-                if (slotAmmoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
-                    return false;
-                }
-                // 如果盒子的子弹 ID 为空，变成当前点击的类型
-                if (boxAmmoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
-                    this.setAmmoId(ammoBox, slotAmmoId);
-                } else if (!slotAmmoId.equals(boxAmmoId)) {
-                    return false;
-                }
-                TimelessAPI.getCommonAmmoIndex(slotAmmoId).ifPresent(index -> {
-                    int boxAmmoCount = this.getAmmoCount(ammoBox);
-                    int boxLevelMultiplier = this.getAmmoLevel(ammoBox) + 1;
-                    int maxSize = index.getStackSize() * SyncConfig.AMMO_BOX_STACK_SIZE.get() * boxLevelMultiplier;
-                    int needCount = maxSize - boxAmmoCount;
-                    ItemStack takeItem = slot.safeTake(slotItem.getCount(), needCount, player);
-                    this.setAmmoCount(ammoBox, boxAmmoCount + takeItem.getCount());
-                });
-                // 播放取出声音
-                this.playInsertSound(player);
-                return true;
-            }
-        }
-        return false;
-    } */
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level pLevel, @NotNull List<Component> components, @NotNull TooltipFlag isAdvanced) {

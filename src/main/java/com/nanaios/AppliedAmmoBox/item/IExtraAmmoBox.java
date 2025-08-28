@@ -20,4 +20,5 @@ public interface IExtraAmmoBox{
         }
         return 0;
     }
+    default void setNowGun(ItemStack gun) {}
 }
