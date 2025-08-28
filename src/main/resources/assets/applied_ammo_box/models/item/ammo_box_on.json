@@ -3,7 +3,7 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [8, 8],
 	"textures": {
-		"1": "applied_ammo_box:item/ammo_box",
+		"1": "applied_ammo_box:item/ammo_box_on",
 		"2": "applied_ammo_box:item/wireless_access_point_on",
 		"3": "applied_ammo_box:item/me",
 		"particle": "applied_ammo_box:item/wireless_access_point_on"
