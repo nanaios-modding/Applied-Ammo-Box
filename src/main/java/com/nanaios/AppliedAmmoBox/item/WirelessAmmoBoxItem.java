@@ -58,21 +58,45 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     @Override
     public void setNowGun(ItemStack gun) {
         if(gun.getItem() instanceof IGun) {
-            cachedGun=gun;
+            cachedGun = gun;
         }
     }
 
     public int getNowAmmoCount(ItemStack ammoBox) {
         IGrid grid = getGrid(ammoBox);
-        if(grid == null) {
-            return 0;
-        }
-        if(!rangeCheck()) {
-            return 0;
-        }
 
+        if(cachedGun == null) return 0;
+        if (cachedGun.getItem() instanceof IGun iGun) {
+            //銃の弾丸情報を取得
+            ResourceLocation gunId = iGun.getGunId(cachedGun);
+            ResourceLocation ammoId = TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId()).orElse(DefaultAssets.EMPTY_AMMO_ID);
+            if (ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) {
+                return 0;
+            }
+
+            //倉庫接続
+            if(grid == null) {
+                return 0;
+            }
+            if(!rangeCheck()) {
+                return 0;
+            }
+            IGridNode node = getActionableNode();
+            if(node == null) {
+                return 0;
+            }
+            IActionSource source = new PlayerSource(player);
+
+            //弾丸のkeyを取得
+            ItemStack ammoStack = AmmoItemBuilder.create().setId(ammoId).build();
+            AEKey what = AEItemKey.of(ammoStack);
+            if(what == null) return 0;
+
+            //弾丸の引き出しシュミレート
+            return (int)StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, Integer.MAX_VALUE, source, Actionable.SIMULATE);
+
+        }
         return 0;
-        //long amount = StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, needAmmoCount, source, Actionable.SIMULATE);
     }
 
     /** 内部的に保存された弾丸の個数を取得
