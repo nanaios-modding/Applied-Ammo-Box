@@ -68,3 +68,10 @@ mandatory=true
 versionRange="[15.4.8,)"
 ordering="AFTER"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="tacz"
+mandatory=true
+versionRange="[1.1.6,)"
+ordering="AFTER"
+side="BOTH"

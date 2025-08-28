@@ -7,4 +7,6 @@ import net.minecraftforge.registries.DeferredRegister;
 
 public class AppliedAmmoBoxCreativeTabs {
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, AppliedAmmoBox.MODID);
+
+    public static  final mm MAIN_TAB = TABS.register("n",)
 }

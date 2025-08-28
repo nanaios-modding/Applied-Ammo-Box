@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "aba",
+    "aca",
+    "aaa"
+  ],
+  "key": {
+    "a": {
+      "tag": "ae2:smart_cable"
+    },
+    "b": {
+      "item": "ae2:wireless_receiver"
+    },
+    "c": {
+      "item": "ae2:controller"
+    }
+  },
+  "result": {
+    "item": "applied_ammo_box:ammo_box",
+    "count": 1
+  }
+}

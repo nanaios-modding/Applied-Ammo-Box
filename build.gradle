@@ -146,6 +146,7 @@ repositories {
         // For Gradle 5.1 and above, limit it to just AE2
         content {
             includeGroup 'appeng'
+            includeGroup "mezz"
         }
     }
 
@@ -156,6 +157,9 @@ dependencies {
 
     implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:6632240-sources-6633203")
     implementation fg.deobf("appeng:appliedenergistics2-forge:15.4.8")
+
+    //compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
+    //runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
     runtimeOnly fg.deobf('curse.maven:guidme-1173950:6679102')
 
