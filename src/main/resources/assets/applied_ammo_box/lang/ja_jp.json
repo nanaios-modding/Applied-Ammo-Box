@@ -1,3 +1,4 @@
 {
-  "item.applied_ammo_box.ammo_box": "無線弾薬箱"
+  "item.applied_ammo_box.ammo_box": "無線弾薬箱",
+  "itemGroup.applied_ammo_box.creative_tab": "Applied Ammo Box"
 }
