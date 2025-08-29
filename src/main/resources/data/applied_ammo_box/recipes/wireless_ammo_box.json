@@ -1,19 +1,26 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "applied_ammo_box:shaped_nbt",
   "pattern": [
     "aba",
-    "aca",
-    "aaa"
+    "cdc",
+    "aea"
   ],
   "key": {
     "a": {
-      "tag": "ae2:smart_cable"
+      "item": "ae2:fluix_pearl"
     },
     "b": {
       "item": "ae2:wireless_receiver"
     },
     "c": {
       "item": "ae2:controller"
+    },
+    "d": {
+      "item": "tacz:ammo_box",
+      "nbt": { "Level": 2 }
+    },
+    "e": {
+      "item": "ae2:singularity"
     }
   },
   "result": {

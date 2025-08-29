@@ -132,6 +132,17 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     maven {
+        // location of the maven that hosts JEI files before January 2023
+        name = "Progwml6's maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        // location of the maven that hosts JEI files since January 2023
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
+
+    maven {
         // Add curse maven to repositories
         name = "Curse Maven"
         url = "https://www.cursemaven.com"
@@ -144,10 +155,6 @@ repositories {
         name "Modmaven"
         url "https://modmaven.dev/"
         // For Gradle 5.1 and above, limit it to just AE2
-        content {
-            includeGroup 'appeng'
-            includeGroup "mezz"
-        }
     }
 
 }
@@ -158,8 +165,8 @@ dependencies {
     implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:6632240-sources-6633203")
     implementation fg.deobf("appeng:appliedenergistics2-forge:15.4.8")
 
-    //compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
-    //runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
     runtimeOnly fg.deobf('curse.maven:guidme-1173950:6679102')
 

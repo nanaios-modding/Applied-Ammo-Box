@@ -1,5 +1,6 @@
 package com.nanaios.AppliedAmmoBox;
 
+import com.nanaios.AppliedAmmoBox.recipes.AppliedAmmoBoxRecipes;
 import com.nanaios.AppliedAmmoBox.registries.AppliedAmmoBoxCreativeTabs;
 import com.nanaios.AppliedAmmoBox.registries.AppliedAmmoBoxItems;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,7 @@ public class AppliedAmmoBox {
 
         AppliedAmmoBoxItems.ITEMS.register(modEventBus);
         AppliedAmmoBoxCreativeTabs.TABS.register(modEventBus);
+        AppliedAmmoBoxRecipes.SERIALIZERS.register(modEventBus);
 
     }
     @SuppressWarnings("removal")
