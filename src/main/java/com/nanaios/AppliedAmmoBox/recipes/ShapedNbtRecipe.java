@@ -1,5 +1,6 @@
 package com.nanaios.AppliedAmmoBox.recipes;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -20,6 +21,7 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Map;
+import java.util.Set;
 
 public class ShapedNbtRecipe extends ShapedRecipe {
     public ShapedNbtRecipe(ShapedRecipe base) {
@@ -35,46 +37,36 @@ public class ShapedNbtRecipe extends ShapedRecipe {
         @SuppressWarnings("removal")
         @Override
         public ShapedNbtRecipe fromJson(ResourceLocation id, JsonObject json) {
-            // --- result 部分は ShapedRecipe に任せる ---
             ShapedRecipe base = RecipeSerializer.SHAPED_RECIPE.fromJson(id, json);
 
-            // --- key 部分を処理し、nbtがあれば Ingredient を置き換える ---
             JsonObject keys = GsonHelper.getAsJsonObject(json, "key");
+            JsonArray patterns = GsonHelper.getAsJsonArray(json,"pattern");
             NonNullList<Ingredient> ingredients = NonNullList.create();
 
-            for (int i = 0; i < base.getIngredients().size(); i++) {
-                Ingredient ingredient = base.getIngredients().get(i);
+            for (int i = 0; i < base.getHeight(); i++) {
+                String pattern = patterns.get(i).getAsString();
 
-                //ingredient.toJson();
+                for(int j = 0;j < pattern.length();j ++) {
+                    Ingredient ingredient = base.getIngredients().get(3 * i + j);
+                    char code = pattern.charAt(j);
 
+                    for(Map.Entry<String,JsonElement> entry: keys.entrySet()) {
+                        char key = entry.getKey().charAt(0);
+                        if(key != code) continue;
 
-                // JSON上のキーを調べて、nbtがあればNbtIngredientに差し替え
-                for (Map.Entry<String, JsonElement> entry : keys.entrySet()) {
+                        JsonObject obj = GsonHelper.convertToJsonObject(entry.getValue(), entry.getKey());
+                        if (!obj.has("nbt")) break;
 
-                    AppliedAmmoBox.LOGGER.info("key = {}",entry.getKey());
-                    AppliedAmmoBox.LOGGER.info("value = {}",entry.getValue());
-
-                    JsonObject obj = GsonHelper.convertToJsonObject(entry.getValue(), entry.getKey());
-
-                    AppliedAmmoBox.LOGGER.info("obj = {}",obj);
-
-                    /* if (obj.has("nbt")) {
                         Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(GsonHelper.getAsString(obj, "item")));
                         try {
                             CompoundTag tag = TagParser.parseTag(obj.get("nbt").toString());
-
-                            //AppliedAmmoBox.LOGGER.info("nbt data = {}",obj.get("nbt").toString());
-
                             ingredient = new NbtIngredient(item, tag);
                         } catch (CommandSyntaxException e) {
                             throw new JsonParseException("Invalid NBT in recipe: " + e.getMessage());
                         }
-                    } */
+                    }
+                    ingredients.add(ingredient);
                 }
-
-                AppliedAmmoBox.LOGGER.info("ingredient = {}",ingredient.toJson());
-
-                ingredients.add(ingredient);
             }
 
             // 新しいレシピを返す
