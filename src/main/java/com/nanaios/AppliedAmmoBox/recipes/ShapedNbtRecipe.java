@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -44,19 +45,35 @@ public class ShapedNbtRecipe extends ShapedRecipe {
             for (int i = 0; i < base.getIngredients().size(); i++) {
                 Ingredient ingredient = base.getIngredients().get(i);
 
+                //ingredient.toJson();
+
+
                 // JSON上のキーを調べて、nbtがあればNbtIngredientに差し替え
                 for (Map.Entry<String, JsonElement> entry : keys.entrySet()) {
+
+                    AppliedAmmoBox.LOGGER.info("key = {}",entry.getKey());
+                    AppliedAmmoBox.LOGGER.info("value = {}",entry.getValue());
+
                     JsonObject obj = GsonHelper.convertToJsonObject(entry.getValue(), entry.getKey());
-                    if (obj.has("nbt")) {
+
+                    AppliedAmmoBox.LOGGER.info("obj = {}",obj);
+
+                    /* if (obj.has("nbt")) {
                         Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(GsonHelper.getAsString(obj, "item")));
                         try {
                             CompoundTag tag = TagParser.parseTag(obj.get("nbt").toString());
+
+                            //AppliedAmmoBox.LOGGER.info("nbt data = {}",obj.get("nbt").toString());
+
                             ingredient = new NbtIngredient(item, tag);
                         } catch (CommandSyntaxException e) {
                             throw new JsonParseException("Invalid NBT in recipe: " + e.getMessage());
                         }
-                    }
+                    } */
                 }
+
+                AppliedAmmoBox.LOGGER.info("ingredient = {}",ingredient.toJson());
+
                 ingredients.add(ingredient);
             }
 
