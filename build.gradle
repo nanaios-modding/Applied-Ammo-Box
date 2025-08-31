@@ -169,7 +169,7 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
-
+    implementation fg.deobf("curse.maven:aeinfinitybooster-559313:6482257")
 
     runtimeOnly fg.deobf('curse.maven:guidme-1173950:6679102')
 

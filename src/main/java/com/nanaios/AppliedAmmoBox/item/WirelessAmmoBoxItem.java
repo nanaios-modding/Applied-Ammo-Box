@@ -184,7 +184,7 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
                 //その他の準備
                 IActionSource source = new PlayerSource(player);
 
-                double needPower = needAmmoCount * 100d;
+                double needPower = needAmmoCount * 500d;
                 double canExtractPower = extractAEPower(ammoBox,needPower,Actionable.SIMULATE);
                 if(canExtractPower < needPower) return false;
 

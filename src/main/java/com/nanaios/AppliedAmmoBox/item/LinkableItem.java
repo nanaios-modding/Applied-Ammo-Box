@@ -22,7 +22,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraftforge.fml.ModList;
 import org.jetbrains.annotations.NotNull;
+import uk.co.hexeption.aeinfinitybooster.AEInfinityBooster;
 
 import javax.annotation.Nullable;
 import java.util.function.DoubleSupplier;
@@ -77,6 +79,10 @@ public abstract class LinkableItem extends AEBasePoweredItem implements ILinkabl
             for (var wap : this.targetGrid.getMachines(WirelessAccessPointBlockEntity.class)) {
                 double sqDistance = getWapSqDistance(wap);
 
+                if (ModList.get().isLoaded(AEInfinityBooster.ID)) {
+                    sqDistance = Math.min(sqDistance,InfBooster.infWap(wap,player));
+                }
+
                 // If the WAP is not suitable then MAX_VALUE will be returned and the check will fail
                 if (sqDistance < bestSqDistance) {
                     bestSqDistance = sqDistance;
@@ -92,7 +98,7 @@ public abstract class LinkableItem extends AEBasePoweredItem implements ILinkabl
         return false;
     }
 
-    protected double getWapSqDistance(IWirelessAccessPoint wap) {
+    protected double getWapSqDistance(WirelessAccessPointBlockEntity wap) {
         if(player == null) return Double.MAX_VALUE;
 
         double rangeLimit = wap.getRange();
