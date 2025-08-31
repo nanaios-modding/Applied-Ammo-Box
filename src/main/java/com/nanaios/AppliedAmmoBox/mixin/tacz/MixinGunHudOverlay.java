@@ -25,7 +25,7 @@ public class MixinGunHudOverlay {
     @Unique
     private static boolean appliedtacz$isCountedWirelessBox = false;
 
-    @Inject(method = "handleInventoryAmmo",at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;getItem(I)Lnet/minecraft/world/item/ItemStack;"))
+    /* @Inject(method = "handleInventoryAmmo",at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;getItem(I)Lnet/minecraft/world/item/ItemStack;"))
     private static void mixinHandleInventoryAmmo(ItemStack stack, Inventory inventory, CallbackInfo ci, @Local(ordinal = 0) int i) {
         ItemStack inventoryItemMixin = inventory.getItem(i);
         if (inventoryItemMixin.getItem() instanceof IExtraAmmoBox iExAmmoBox && !appliedtacz$isCountedWirelessBox) {
@@ -33,7 +33,7 @@ public class MixinGunHudOverlay {
             iExAmmoBox.setNowGun(stack);
             cacheInventoryAmmoCount += ((IAmmoBox)iExAmmoBox).getAmmoCount(inventoryItemMixin);
         }
-    }
+    } */
 
     @Inject(method = "handleCacheCount",at = @At(value = "INVOKE", target = "Lcom/tacz/guns/client/gui/overlay/GunHudOverlay;handleInventoryAmmo(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/player/Inventory;)V"))
     private static void mixinHandleCacheCount(LocalPlayer player, ItemStack stack, GunData gunData, IGun iGun, boolean useInventoryAmmo, CallbackInfo ci) {
