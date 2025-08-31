@@ -272,7 +272,8 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     @OnlyIn(Dist.CLIENT)
     public boolean isLinked(ItemStack stack) {
         GlobalPos pos = getLinkedPosition(stack);
-        return pos != null;
+        double power = extractAEPower(stack,500d,Actionable.SIMULATE);
+        return pos != null && power >= 500d;
     }
 
     @Override
