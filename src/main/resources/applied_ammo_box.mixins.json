@@ -8,12 +8,12 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "applied_ammo_box.refmap.json",
   "mixins": [
-    "MixinAbstractGunItem",
-    "MixinGridLinkables",
-    "MixinIAmmoBox"
+    "tacz.MixinAbstractGunItem",
+    "ae2.MixinGridLinkables",
+    "tacz.MixinIAmmoBox"
   ],
   "client": [
-    "MixinGunHudOverlay"
+    "tacz.MixinGunHudOverlay"
   ],
   "injectors": {
     "defaultRequire": 1

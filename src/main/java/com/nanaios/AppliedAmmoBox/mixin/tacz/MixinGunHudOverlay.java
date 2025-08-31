@@ -1,4 +1,4 @@
-package com.nanaios.AppliedAmmoBox.mixin;
+package com.nanaios.AppliedAmmoBox.mixin.tacz;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.nanaios.AppliedAmmoBox.item.IExtraAmmoBox;
