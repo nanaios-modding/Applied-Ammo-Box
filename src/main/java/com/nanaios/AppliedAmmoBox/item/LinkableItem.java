@@ -6,6 +6,7 @@ import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.blockentity.networking.WirelessAccessPointBlockEntity;
 import appeng.core.localization.PlayerMessages;
+import appeng.items.tools.powered.powersink.AEBasePoweredItem;
 import appeng.util.Platform;
 import com.mojang.datafixers.util.Pair;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
@@ -24,8 +25,9 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.function.DoubleSupplier;
 
-public abstract class LinkableItem extends Item implements ILinkableItem{
+public abstract class LinkableItem extends AEBasePoweredItem implements ILinkableItem{
 
     public static String TAG_ACCESS_POINT_POS = "accessPoint";
     public double currentDistanceFromGrid;
@@ -42,8 +44,13 @@ public abstract class LinkableItem extends Item implements ILinkableItem{
         }
     }
 
-    public LinkableItem(Properties p) {
-        super(p);
+    @Override
+    public double getChargeRate(ItemStack stack) {
+        return 800d;
+    }
+
+    public LinkableItem(DoubleSupplier powerCapacity, Properties p) {
+        super(powerCapacity,p);
     }
 
     public GlobalPos getLinkedPosition(ItemStack item) {

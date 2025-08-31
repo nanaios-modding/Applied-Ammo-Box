@@ -8,6 +8,7 @@ import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.storage.StorageHelper;
+import appeng.core.AEConfig;
 import appeng.core.localization.GuiText;
 import appeng.core.localization.PlayerMessages;
 import appeng.core.localization.Tooltips;
@@ -46,7 +47,7 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
     public WirelessAmmoBoxItem() {
-        super(new Properties().stacksTo(1));
+        super(AEConfig.instance().getWirelessTerminalBattery(),new Properties().stacksTo(1));
     }
 
     @Override
@@ -183,8 +184,12 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
                 //その他の準備
                 IActionSource source = new PlayerSource(player);
 
+                double needPower = needAmmoCount * 100d;
+                double canExtractPower = extractAEPower(ammoBox,needPower,Actionable.SIMULATE);
+                if(canExtractPower < needPower) return false;
+
                 //倉庫から搬入できるか調査
-                int amount = (int)StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, needAmmoCount, source, Actionable.SIMULATE);
+                int simulatedAmount = (int)StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, needAmmoCount, source, Actionable.SIMULATE);
 
                 if(server.isSameThread()) {
                     if(!ammoId.equals(getAmmoId(ammoBox)) && getAmmoCountCache(ammoBox) > 0) {
@@ -224,7 +229,7 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
                 }
 
                 // AppliedAmmoBox.LOGGER.info("amount = {}",amount);
-                if (amount <= 0) {
+                if (simulatedAmount <= 0) {
                     if(server.isSameThread()) {
                         return getAmmoCountCache(ammoBox) > 0;
                     }else {
@@ -234,12 +239,13 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
                 }
 
                 if(server.isSameThread()) {
-                    if(needAmmoCount < getAmmoCountCache(ammoBox)) return true;
+                    if(needAmmoCount <= getAmmoCountCache(ammoBox)) return true;
 
-                    int need = Math.min(amount,needAmmoCount - getAmmoCountCache(ammoBox));
+                    int needAmount = Math.min(simulatedAmount,needAmmoCount - getAmmoCountCache(ammoBox));
 
                     //倉庫から搬入
-                    amount = (int)StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, need, source, Actionable.MODULATE);
+                    int amount = (int)StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), what, needAmount, source, Actionable.MODULATE);
+                    extractAEPower(ammoBox,needPower,Actionable.MODULATE);
 
                     //弾薬箱にデータをセット
                     setAmmoCount(ammoBox,getAmmoCountCache(ammoBox) + amount);
@@ -253,7 +259,9 @@ public class WirelessAmmoBoxItem extends LinkableItem implements DyeableLeatherI
     }
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level pLevel, @NotNull List<Component> components, @NotNull TooltipFlag isAdvanced) {
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> components, @NotNull TooltipFlag isAdvanced) {
+        super.appendHoverText(stack, level, components, isAdvanced);
+
         if (getLinkedPosition(stack) == null) {
             components.add(Tooltips.of(GuiText.Unlinked, Tooltips.RED));
         } else {
