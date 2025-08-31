@@ -2,7 +2,7 @@ package com.nanaios.AppliedAmmoBox.mixin.ae2;
 
 import appeng.api.features.GridLinkables;
 import appeng.api.features.IGridLinkableHandler;
-import com.nanaios.AppliedAmmoBox.item.ILinkableItem;
+import com.nanaios.AppliedAmmoBox.item.LinkableItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +15,7 @@ public class MixinGridLinkables {
     @Inject(method = "get",at=@At("HEAD"),cancellable = true)
     private static void mixinGridLinkables$get(ItemLike itemLike, CallbackInfoReturnable<IGridLinkableHandler> cir) {
         Item itemInMixin = itemLike.asItem();
-        if(itemInMixin != null && itemInMixin instanceof ILinkableItem linkable) {
+        if(itemInMixin != null && itemInMixin instanceof LinkableItem linkable) {
             cir.setReturnValue(linkable.getLinkableHandler());
         }
     }

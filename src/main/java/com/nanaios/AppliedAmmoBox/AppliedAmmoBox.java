@@ -34,6 +34,11 @@ public class AppliedAmmoBox {
     }
 
     @SuppressWarnings("removal")
+    public static ResourceLocation rlSingle(String str) {
+        return new ResourceLocation(str);
+    }
+
+    @SuppressWarnings("removal")
     public static ResourceLocation rl(String path) {
         return new ResourceLocation(MODID, path);
     }

@@ -29,7 +29,7 @@ import uk.co.hexeption.aeinfinitybooster.AEInfinityBooster;
 import javax.annotation.Nullable;
 import java.util.function.DoubleSupplier;
 
-public abstract class LinkableItem extends AEBasePoweredItem implements ILinkableItem{
+public abstract class LinkableItem extends AEBasePoweredItem{
 
     public static String TAG_ACCESS_POINT_POS = "accessPoint";
     public double currentDistanceFromGrid;
@@ -40,7 +40,8 @@ public abstract class LinkableItem extends AEBasePoweredItem implements ILinkabl
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
-        if (level.isClientSide()) return;
+
+        if(level.isClientSide()) return;
         if(entity instanceof Player p) {
             this.player = p;
         }

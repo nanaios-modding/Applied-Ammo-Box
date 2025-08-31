@@ -58,7 +58,7 @@ public class NbtIngredient extends Ingredient {
 
         @Override
         public NbtIngredient parse(JsonObject json) {
-            ResourceLocation itemId = new ResourceLocation(GsonHelper.getAsString(json, "item"));
+            ResourceLocation itemId = AppliedAmmoBox.rlSingle(GsonHelper.getAsString(json, "item"));
             Item item = ForgeRegistries.ITEMS.getValue(itemId);
 
             CompoundTag tag = null;
