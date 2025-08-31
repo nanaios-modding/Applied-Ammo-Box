@@ -42,9 +42,9 @@ public abstract class LinkableItem extends AEBasePoweredItem{
         super.inventoryTick(stack, level, entity, slotId, isSelected);
 
         if(level.isClientSide()) return;
-        if(entity instanceof Player p) {
-            this.player = p;
-        }
+        if(!(entity instanceof Player)) return;
+
+        this.player = (Player) entity;
     }
 
     @Override

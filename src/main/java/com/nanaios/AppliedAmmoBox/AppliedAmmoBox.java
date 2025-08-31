@@ -1,5 +1,6 @@
 package com.nanaios.AppliedAmmoBox;
 
+import com.nanaios.AppliedAmmoBox.network.AppliedAmmoBoxNetwork;
 import com.nanaios.AppliedAmmoBox.recipes.AppliedAmmoBoxRecipes;
 import com.nanaios.AppliedAmmoBox.recipes.NbtIngredient;
 import com.nanaios.AppliedAmmoBox.registries.AppliedAmmoBoxCreativeTabs;
@@ -25,6 +26,8 @@ public class AppliedAmmoBox {
         AppliedAmmoBoxItems.ITEMS.register(modEventBus);
         AppliedAmmoBoxCreativeTabs.TABS.register(modEventBus);
         AppliedAmmoBoxRecipes.SERIALIZERS.register(modEventBus);
+
+        AppliedAmmoBoxNetwork.register();
 
         modEventBus.addListener(this::commonSetup);
     }
