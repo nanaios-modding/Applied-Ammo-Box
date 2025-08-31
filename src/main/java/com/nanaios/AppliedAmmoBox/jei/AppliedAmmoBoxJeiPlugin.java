@@ -52,7 +52,7 @@ public class AppliedAmmoBoxJeiPlugin implements IModPlugin {
         inputs.set(2, Ingredient.of(AEItems.FLUIX_PEARL));
         inputs.set(3, Ingredient.of(AEBlocks.CONTROLLER));
         inputs.set(4, Ingredient.of(ammoBox));
-        inputs.set(5, Ingredient.of(AEBlocks.CONTROLLER));
+        inputs.set(5, Ingredient.of(AEBlocks.DENSE_ENERGY_CELL));
         inputs.set(6, Ingredient.of(AEItems.FLUIX_PEARL));
         inputs.set(7, Ingredient.of(AEItems.SINGULARITY));
         inputs.set(8, Ingredient.of(AEItems.FLUIX_PEARL));

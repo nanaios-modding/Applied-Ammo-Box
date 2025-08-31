@@ -2,7 +2,7 @@
   "type": "applied_ammo_box:shaped_nbt",
   "pattern": [
     "aba",
-    "cdc",
+    "cdf",
     "aea"
   ],
   "key": {
@@ -21,6 +21,9 @@
     },
     "e": {
       "item": "ae2:singularity"
+    },
+    "f": {
+      "item": "ae2:dense_energy_cell"
     }
   },
   "result": {
