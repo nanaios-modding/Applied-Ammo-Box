@@ -79,8 +79,9 @@ public class AppliedAmmoBoxJeiPlugin implements IModPlugin {
                 .get()
                 .collect(Collectors.toMap(cat -> cat.getRecipeType().getUid(), Function.identity()));
 
-        ResourceLocation category = new ResourceLocation("minecraft","crafting");
-        ResourceLocation[] recipesToRemove = {new ResourceLocation("applied_ammo_box","wireless_ammo_box")};
+
+        ResourceLocation category = AppliedAmmoBox.rl("minecraft","crafting");
+        ResourceLocation[] recipesToRemove = {AppliedAmmoBox.rl("applied_ammo_box","wireless_ammo_box")};
 
         for (var toRemove : recipesToRemove) {
             if (!categoryById.containsKey(category)) continue;

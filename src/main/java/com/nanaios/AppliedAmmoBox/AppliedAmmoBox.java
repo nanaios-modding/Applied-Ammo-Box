@@ -28,4 +28,8 @@ public class AppliedAmmoBox {
     public static ResourceLocation rl(String path) {
         return new ResourceLocation(MODID, path);
     }
+    @SuppressWarnings("removal")
+    public static ResourceLocation rl(String namespace,String path) {
+        return new ResourceLocation(namespace, path);
+    }
 }
