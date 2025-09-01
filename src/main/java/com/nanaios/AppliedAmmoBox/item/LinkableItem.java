@@ -11,6 +11,7 @@ import appeng.util.Platform;
 import com.mojang.datafixers.util.Pair;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import net.minecraft.Util;
+import net.minecraft.client.gui.font.providers.UnihexProvider;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -150,11 +151,7 @@ public abstract class LinkableItem extends AEBasePoweredItem{
             return null;
         }
 
-        //もしかしたらunsafeだったりするかもしれない
-        //まずいか？これ
-        //TODO 現状問題なし。バグの時疑うべし
-        //var be = level.getChunkAt(linkedPos.pos()).getBlockEntity(linkedPos.pos(), LevelChunk.EntityCreationType.IMMEDIATE);
-        var be = Platform.getTickingBlockEntity(level, linkedPos.pos());
+        var be = Platform.getTickingBlockEntity(linkedLevel, linkedPos.pos());
 
         if (!(be instanceof IWirelessAccessPoint accessPoint)) {
             player.displayClientMessage(PlayerMessages.LinkedNetworkNotFound.text(), true);
