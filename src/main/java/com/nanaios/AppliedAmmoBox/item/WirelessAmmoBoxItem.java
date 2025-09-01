@@ -124,6 +124,10 @@ public class WirelessAmmoBoxItem extends LinkableItem implements AmmoBoxItemData
         AEKey key = AEItemKey.of(ammoStack);
         if(key == null) return;
 
+        double needPower = needAmmoCount * 1000d;
+        double extractPower = extractAEPower(ammoBox,needPower,Actionable.SIMULATE);
+        extractAEPower(ammoBox,extractPower,Actionable.MODULATE);
+
         //引き出し
         int extractableAmmoCount = (int) StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, needAmmoCount, source, Actionable.SIMULATE);
         StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, extractableAmmoCount, source, Actionable.MODULATE);
