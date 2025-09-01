@@ -19,6 +19,7 @@ import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -86,12 +87,18 @@ public class WirelessAmmoBoxItem extends LinkableItem implements AmmoBoxItemData
         if(key == null) return;
 
         int storageAmmoCount =(int) StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, Integer.MAX_VALUE, source, Actionable.SIMULATE);
-        setAmmoCount(ammoBox,storageAmmoCount);
+        //setAmmoCountを呼ぶと無駄にME倉庫に接続したりするから単離
+        AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, storageAmmoCount);
     }
 
     @Override
     public boolean isAmmoBoxOfGun(ItemStack gun, ItemStack ammoBox) {
         return AmmoBoxItemDataAccessor.super.isAmmoBoxOfGun(gun, ammoBox);
+    }
+
+    @Override
+    public void setAmmoCount(ItemStack ammoBox, int count) {
+        AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count);
     }
 
     @Override
