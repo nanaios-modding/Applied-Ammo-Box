@@ -13,13 +13,12 @@ import appeng.core.localization.GuiText;
 import appeng.core.localization.Tooltips;
 import appeng.me.helpers.ChannelPowerSrc;
 import appeng.me.helpers.PlayerSource;
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
+import com.tacz.guns.api.item.IAmmoBox;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -42,12 +41,11 @@ public class WirelessAmmoBoxItem extends LinkableItem implements AmmoBoxItemData
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
     private long lastCheckedtimeStamp = -1L;
+    private boolean isMarkUpdate = false;
 
     public WirelessAmmoBoxItem() {
         super(AEConfig.instance().getWirelessTerminalBattery(),new Properties().stacksTo(1));
     }
-
-
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
@@ -59,23 +57,63 @@ public class WirelessAmmoBoxItem extends LinkableItem implements AmmoBoxItemData
         if(mainHandStack.getItem() instanceof IGun gun) {
             ResourceLocation gunId = gun.getGunId(mainHandStack);
             ResourceLocation ammoId =  TimelessAPI.getCommonGunIndex(gunId).map(commonGunIndex -> commonGunIndex.getGunData().getAmmoId()).orElse(DefaultAssets.EMPTY_AMMO_ID);
-            setAmmoId(stack,ammoId);
             if(ammoId.equals(DefaultAssets.EMPTY_AMMO_ID)) return;
+            //現在保存されている銃のidと比較して、異なるなら更新
+            if(!ammoId.toString().equals(getAmmoId(stack).toString())) {
+                setAmmoId(stack,ammoId);
+                isMarkUpdate = true;
+            }
 
-            if((System.currentTimeMillis() - lastCheckedtimeStamp) > 1000) {
+            if((System.currentTimeMillis() - lastCheckedtimeStamp) > 1000 || isMarkUpdate) {
                 lastCheckedtimeStamp = System.currentTimeMillis();
-                setAmmoCount(stack,getAmmoCount(stack) + 10);
-
-                getAmmoCountInMEStorage(stack,ammoId,player);
+                isMarkUpdate = false;
+                int storageAmmoCount = getAmmoCountInMEStorage(stack,ammoId,player);
+                //setAmmoCountを呼ぶと無駄にME倉庫に接続したりするから単離
+                AmmoBoxItemDataAccessor.super.setAmmoCount(stack, storageAmmoCount);
             };
         }
     }
 
-    private void getAmmoCountInMEStorage(ItemStack ammoBox, ResourceLocation ammoId, Player player) {
+    @Override
+    public boolean isAmmoBoxOfGun(ItemStack gun, ItemStack ammoBox) {
+        if (gun.getItem() instanceof IGun iGun && ammoBox.getItem() instanceof IAmmoBox iAmmoBox) {
+            ResourceLocation ammoId = iAmmoBox.getAmmoId(ammoBox);
+            ResourceLocation gunId = iGun.getGunId(gun);
+            boolean isEqualAmmoId = TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId().equals(ammoId)).orElse(false);
+            boolean isHaveAmmo = iAmmoBox.getAmmoCount(ammoBox) > 0;
+            return  isEqualAmmoId && isHaveAmmo;
+        }
+        return false;
+    }
+
+    private int getAmmoCountInMEStorage(ItemStack ammoBox, ResourceLocation ammoId, Player player) {
+        //倉庫接続
+        IGrid grid = getGrid(ammoBox);
+        if(grid == null) return 0;
+        if(!rangeCheck()) return 0;
+
+        IGridNode node = getActionableNode();
+        if(node == null) return 0;
+
+        IActionSource source = new PlayerSource(player);
+
+        ItemStack ammoStack = AmmoItemBuilder.create().setId(ammoId).setCount(1).build();
+        AEKey key = AEItemKey.of(ammoStack);
+        if(key == null) return 0;
+
+        return (int) StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, Integer.MAX_VALUE, source, Actionable.SIMULATE);
+    }
+
+    @Override
+    public void setAmmoCount(ItemStack ammoBox, int count) {
+        int nowAmmoCount = getAmmoCount(ammoBox);
+        ResourceLocation ammoId = getAmmoId(ammoBox);
+        int needAmmoCount = nowAmmoCount -count;
+        //AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count);
+
         //倉庫接続
         IGrid grid = getGrid(ammoBox);
         if(grid == null) return;
-        if(!rangeCheck()) return;
 
         IGridNode node = getActionableNode();
         if(node == null) return;
@@ -86,19 +124,10 @@ public class WirelessAmmoBoxItem extends LinkableItem implements AmmoBoxItemData
         AEKey key = AEItemKey.of(ammoStack);
         if(key == null) return;
 
-        int storageAmmoCount =(int) StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, Integer.MAX_VALUE, source, Actionable.SIMULATE);
-        //setAmmoCountを呼ぶと無駄にME倉庫に接続したりするから単離
-        AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, storageAmmoCount);
-    }
-
-    @Override
-    public boolean isAmmoBoxOfGun(ItemStack gun, ItemStack ammoBox) {
-        return AmmoBoxItemDataAccessor.super.isAmmoBoxOfGun(gun, ammoBox);
-    }
-
-    @Override
-    public void setAmmoCount(ItemStack ammoBox, int count) {
-        AmmoBoxItemDataAccessor.super.setAmmoCount(ammoBox, count);
+        //引き出し
+        int extractableAmmoCount = (int) StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, needAmmoCount, source, Actionable.SIMULATE);
+        StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, extractableAmmoCount, source, Actionable.MODULATE);
+        isMarkUpdate = true;
     }
 
     @Override
