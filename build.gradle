@@ -95,6 +95,8 @@ minecraft {
         }
 
         client {
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             property 'forge.enabledGameTestNamespaces', mod_id
         }
@@ -156,6 +158,10 @@ repositories {
         url "https://modmaven.dev/"
         // For Gradle 5.1 and above, limit it to just AE2
     }
+    maven {
+        name = "Illusive Soulworks maven"
+        url = "https://maven.theillusivec4.top/"
+    }
 
 }
 
@@ -172,6 +178,12 @@ dependencies {
     compileOnly fg.deobf("curse.maven:aeinfinitybooster-559313:6482257")
 
     runtimeOnly fg.deobf('curse.maven:guidme-1173950:6679102')
+    runtimeOnly fg.deobf('curse.maven:tagtooltips-899941:6407506')
+
+    // Compile against only the API artifact
+    compileOnly(fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api"))
+    // Use the full Curios API jar at runtime
+    runtimeOnly(fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}"))
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
