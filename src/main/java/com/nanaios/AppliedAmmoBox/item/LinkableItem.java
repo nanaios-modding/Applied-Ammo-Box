@@ -153,7 +153,8 @@ public abstract class LinkableItem extends AEBasePoweredItem{
         //もしかしたらunsafeだったりするかもしれない
         //まずいか？これ
         //TODO 現状問題なし。バグの時疑うべし
-        var be = level.getChunkAt(linkedPos.pos()).getBlockEntity(linkedPos.pos(), LevelChunk.EntityCreationType.IMMEDIATE);
+        //var be = level.getChunkAt(linkedPos.pos()).getBlockEntity(linkedPos.pos(), LevelChunk.EntityCreationType.IMMEDIATE);
+        var be = Platform.getTickingBlockEntity(level, linkedPos.pos());
 
         if (!(be instanceof IWirelessAccessPoint accessPoint)) {
             player.displayClientMessage(PlayerMessages.LinkedNetworkNotFound.text(), true);
