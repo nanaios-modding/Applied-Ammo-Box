@@ -10,9 +10,7 @@
   "mixins": [
     "ae2.MixinGridLinkables"
   ],
-  "client": [
-    "tacz.MixinGunHudOverlay"
-  ],
+  "client": [],
   "injectors": {
     "defaultRequire": 1
   },
