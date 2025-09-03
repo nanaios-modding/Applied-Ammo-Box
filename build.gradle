@@ -163,6 +163,10 @@ repositories {
         url = "https://maven.theillusivec4.top/"
     }
 
+    flatDir {
+        dirs 'run/mods'
+    }
+
 }
 
 dependencies {
