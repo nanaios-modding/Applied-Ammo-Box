@@ -181,6 +181,8 @@ dependencies {
 
     compileOnly fg.deobf("curse.maven:aeinfinitybooster-559313:6482257")
 
+    runtimeOnly fg.deobf("curse.maven:tacz-curiosable-ammo-box-1339813:6956113")
+
     runtimeOnly fg.deobf('curse.maven:guidme-1173950:6679102')
     runtimeOnly fg.deobf('curse.maven:tagtooltips-899941:6407506')
 
