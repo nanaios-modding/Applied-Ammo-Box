@@ -1,18 +1,11 @@
 package com.nanaios.AppliedAmmoBox.item;
 
 import appeng.api.features.IGridLinkableHandler;
-import appeng.api.implementations.blockentities.IWirelessAccessPoint;
-import appeng.api.networking.IGrid;
-import appeng.blockentity.networking.WirelessAccessPointBlockEntity;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
-
-import static com.nanaios.AppliedAmmoBox.item.LinkableItem.TAG_ACCESS_POINT_POS;
+import static com.nanaios.AppliedAmmoBox.item.WirelessAmmoBoxItem.TAG_ACCESS_POINT_POS;
 
 public class LinkableHandler implements IGridLinkableHandler {
     @Override

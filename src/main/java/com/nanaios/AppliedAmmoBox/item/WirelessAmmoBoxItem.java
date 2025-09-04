@@ -1,28 +1,41 @@
 package com.nanaios.AppliedAmmoBox.item;
 
+import appeng.api.config.AccessRestriction;
 import appeng.api.config.Actionable;
 import appeng.api.features.IGridLinkableHandler;
+import appeng.api.implementations.blockentities.IWirelessAccessPoint;
+import appeng.api.implementations.items.IAEItemPowerStorage;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.storage.StorageHelper;
+import appeng.blockentity.networking.WirelessAccessPointBlockEntity;
 import appeng.core.AEConfig;
 import appeng.core.localization.GuiText;
+import appeng.core.localization.PlayerMessages;
 import appeng.core.localization.Tooltips;
+import appeng.items.tools.powered.powersink.AEBasePoweredItem;
 import appeng.me.helpers.ChannelPowerSrc;
 import appeng.me.helpers.PlayerSource;
+import appeng.util.Platform;
+import com.mojang.datafixers.util.Pair;
+import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IAmmoBox;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.builder.AmmoItemBuilder;
-import com.tacz.guns.api.item.nbt.AmmoBoxItemDataAccessor;
+import com.tacz.guns.item.AmmoBoxItem;
+import net.minecraft.Util;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -30,28 +43,28 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.ModList;
 import org.jetbrains.annotations.NotNull;
-
+import uk.co.hexeption.aeinfinitybooster.AEInfinityBooster;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class WirelessAmmoBoxItem extends LinkableItem implements AmmoBoxItemDataAccessor {
-    public static final String CACHED_GUN_ID = "cachedGunId";
-    public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
-
-    private long lastCheckedtimeStamp = -1L;
+public class WirelessAmmoBoxItem extends WirelessAmmoBoxBase{
+    private long lastCheckedTimeStamp = -1L;
     private boolean isMarkUpdate = false;
 
     public WirelessAmmoBoxItem() {
-        super(AEConfig.instance().getWirelessTerminalBattery(),new Properties().stacksTo(1));
+        super(AEConfig.instance().getWirelessTerminalBattery());
     }
 
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         if(level.isClientSide()) return;
-        if(player == null) return;
+        if(!(entity instanceof Player)) return;
+
+        this.player = (Player) entity;
 
         ItemStack mainHandStack = player.getItemInHand(InteractionHand.MAIN_HAND);
         if(mainHandStack.getItem() instanceof IGun gun) {
@@ -64,12 +77,12 @@ public class WirelessAmmoBoxItem extends LinkableItem implements AmmoBoxItemData
                 isMarkUpdate = true;
             }
 
-            if((System.currentTimeMillis() - lastCheckedtimeStamp) > 1000 || isMarkUpdate) {
-                lastCheckedtimeStamp = System.currentTimeMillis();
+            if((System.currentTimeMillis() - lastCheckedTimeStamp) > 1000 || isMarkUpdate) {
+                lastCheckedTimeStamp = System.currentTimeMillis();
                 isMarkUpdate = false;
                 int storageAmmoCount = getAmmoCountInMEStorage(stack,ammoId,player);
                 //setAmmoCountを呼ぶと無駄にME倉庫に接続したりするから単離
-                AmmoBoxItemDataAccessor.super.setAmmoCount(stack, storageAmmoCount);
+                super.setAmmoCount(stack, storageAmmoCount);
             };
         }
     }
@@ -143,18 +156,6 @@ public class WirelessAmmoBoxItem extends LinkableItem implements AmmoBoxItemData
         } else {
             components.add(Tooltips.of(GuiText.Linked, Tooltips.GREEN));
         }
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public boolean isLinked(ItemStack stack) {
-        GlobalPos pos = getLinkedPosition(stack);
-        double power = extractAEPower(stack,500d,Actionable.SIMULATE);
-        return pos != null && power >= 500d;
-    }
-
-    @Override
-    public IGridLinkableHandler getLinkableHandler() {
-        return WirelessAmmoBoxItem.LINKABLE_HANDLER;
     }
 
     public void setCachedGunId(ItemStack stack, ResourceLocation id) {

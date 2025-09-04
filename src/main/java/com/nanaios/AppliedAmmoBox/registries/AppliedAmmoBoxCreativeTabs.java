@@ -1,5 +1,6 @@
 package com.nanaios.AppliedAmmoBox.registries;
 
+import appeng.api.config.Actionable;
 import appeng.items.tools.powered.powersink.AEBasePoweredItem;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import com.nanaios.AppliedAmmoBox.item.WirelessAmmoBoxItem;
@@ -20,10 +21,7 @@ public class AppliedAmmoBoxCreativeTabs {
             .displayItems((params, output) -> {
                 Item item= AppliedAmmoBoxItems.AMMO_BOX.get();
                 // ここでタブに表示するアイテムを指定
-                //output.accept(item);
-                if(item instanceof AEBasePoweredItem baseItem) {
-                    baseItem.addToMainCreativeTab(output);
-                }
+                output.accept(item);
             })
             .build()
     );
