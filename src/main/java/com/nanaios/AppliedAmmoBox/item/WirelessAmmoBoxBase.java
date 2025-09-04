@@ -10,7 +10,6 @@ import appeng.api.networking.IGridNode;
 import appeng.blockentity.networking.WirelessAccessPointBlockEntity;
 import appeng.core.localization.PlayerMessages;
 import appeng.core.localization.Tooltips;
-import appeng.items.tools.powered.powersink.AEBasePoweredItem;
 import appeng.util.Platform;
 import com.mojang.datafixers.util.Pair;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
@@ -23,24 +22,29 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.ModList;
 import uk.co.hexeption.aeinfinitybooster.AEInfinityBooster;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 
 public class WirelessAmmoBoxBase extends AmmoBoxItem implements IAEItemPowerStorage, ILinkableItem{
     private static final String CURRENT_POWER_NBT_KEY = "internalCurrentPower";
-    public static final String CACHED_GUN_ID = "cachedGunId";
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
     public static String TAG_ACCESS_POINT_POS = "accessPoint";
     public double currentDistanceFromGrid;
@@ -177,6 +181,16 @@ public class WirelessAmmoBoxBase extends AmmoBoxItem implements IAEItemPowerStor
         return WirelessAmmoBoxItem.LINKABLE_HANDLER;
     }
 
+    @Override
+    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack pOther, Slot slot, ClickAction action, Player player, SlotAccess access) {
+        return false;
+    }
+
+    @Override
+    public boolean overrideStackedOnOther(ItemStack ammoBox, Slot slot, ClickAction action, Player player) {
+        return false;
+    }
+
     @OnlyIn(Dist.CLIENT)
     @Override
     public void appendHoverText(ItemStack stack, Level level, List<Component> lines,
@@ -203,24 +217,12 @@ public class WirelessAmmoBoxBase extends AmmoBoxItem implements IAEItemPowerStor
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
-        return true;
+        return false;
     }
 
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
         return slotChanged || !ItemStack.isSameItem(oldStack, newStack);
-    }
-
-    @Override
-    public int getBarWidth(ItemStack stack) {
-        double filled = getAECurrentPower(stack) / getAEMaxPower(stack);
-        return Mth.clamp((int) (filled * 13), 0, 13);
-    }
-
-    @Override
-    public int getBarColor(ItemStack stack) {
-        // This is the standard green color of full durability bars
-        return Mth.hsvToRgb(1 / 3.0F, 1.0F, 1.0F);
     }
 
     @Override
@@ -322,11 +324,20 @@ public class WirelessAmmoBoxBase extends AmmoBoxItem implements IAEItemPowerStor
 
     @Override
     public double getChargeRate(ItemStack stack) {
-        return 0;
+        return 800d;
     }
 
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, CompoundTag nbt) {
-        return super.initCapabilities(stack, nbt);
+        try {
+            Class<?> target = Class.forName("appeng.items.tools.powered.powersink.PoweredItemCapabilities");
+            Class<?> iFaceType = Class.forName("appeng.api.implementations.items.IAEItemPowerStorage");
+            Constructor<?> constructor = target.getDeclaredConstructor(ItemStack.class,iFaceType);
+            constructor.setAccessible(true);
+            Object instance = constructor.newInstance(stack,this);
+            return (ICapabilityProvider) instance;
+        } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
