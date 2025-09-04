@@ -10,6 +10,7 @@ import appeng.api.networking.IGridNode;
 import appeng.blockentity.networking.WirelessAccessPointBlockEntity;
 import appeng.core.localization.PlayerMessages;
 import appeng.core.localization.Tooltips;
+import appeng.items.tools.powered.powersink.AEBasePoweredItem;
 import appeng.util.Platform;
 import com.mojang.datafixers.util.Pair;
 import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.ModList;
 import uk.co.hexeption.aeinfinitybooster.AEInfinityBooster;
 
@@ -321,5 +323,10 @@ public class WirelessAmmoBoxBase extends AmmoBoxItem implements IAEItemPowerStor
     @Override
     public double getChargeRate(ItemStack stack) {
         return 0;
+    }
+
+    @Override
+    public ICapabilityProvider initCapabilities(ItemStack stack, CompoundTag nbt) {
+        return super.initCapabilities(stack, nbt);
     }
 }
