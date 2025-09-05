@@ -29,10 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class WirelessAmmoBoxItem extends WirelessAmmoBoxBase{
-    private long lastCheckedTimeStamp = -1L;
-    private boolean isMarkUpdate = false;
-
+public class WirelessAmmoBoxItem extends WirelessAmmoBoxBase implements ICheckedTimeStampable{
     public WirelessAmmoBoxItem() {
         super(AEConfig.instance().getWirelessTerminalBattery());
     }
@@ -53,18 +50,20 @@ public class WirelessAmmoBoxItem extends WirelessAmmoBoxBase{
             //現在保存されている銃のidと比較して、異なるなら更新
             if(!ammoId.toString().equals(getAmmoId(stack).toString())) {
                 setAmmoId(stack,ammoId);
-                isMarkUpdate = true;
+                setMarkUpdate(stack,true);
             }
 
-            if((System.currentTimeMillis() - lastCheckedTimeStamp) > 1000 || isMarkUpdate) {
-                lastCheckedTimeStamp = System.currentTimeMillis();
-                isMarkUpdate = false;
+            if((System.currentTimeMillis() - getLastCheckedTimeStamp(stack)) > 1000 || getMarkUpdate(stack)) {
+                setLastCheckedTimeStamp(stack, System.currentTimeMillis());
+                setMarkUpdate(stack,false);
                 int storageAmmoCount = getAmmoCountInMEStorage(stack,ammoId,player);
                 //setAmmoCountを呼ぶと無駄にME倉庫に接続したりするから単離
                 super.setAmmoCount(stack, storageAmmoCount);
             };
         }
     }
+
+
 
     @Override
     public boolean isAmmoBoxOfGun(ItemStack gun, ItemStack ammoBox) {
@@ -123,7 +122,7 @@ public class WirelessAmmoBoxItem extends WirelessAmmoBoxBase{
         //引き出し
         int extractableAmmoCount = (int) StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, needAmmoCount, source, Actionable.SIMULATE);
         StorageHelper.poweredExtraction(new ChannelPowerSrc(node, grid.getEnergyService()), grid.getStorageService().getInventory(), key, extractableAmmoCount, source, Actionable.MODULATE);
-        isMarkUpdate = true;
+        setMarkUpdate(ammoStack,true);
     }
 
     @Override

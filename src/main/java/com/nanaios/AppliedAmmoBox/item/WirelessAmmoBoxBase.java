@@ -78,6 +78,11 @@ public class WirelessAmmoBoxBase extends AmmoBoxItem implements IAEItemPowerStor
         }
     }
 
+    @Override
+    public Component getName(ItemStack stack) {
+        return Component.translatable("item.applied_ammo_box.ammo_box");
+    }
+
     public boolean rangeCheck() {
         this.currentDistanceFromGrid = Double.MAX_VALUE;
 
@@ -217,7 +222,19 @@ public class WirelessAmmoBoxBase extends AmmoBoxItem implements IAEItemPowerStor
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
-        return false;
+        return true;
+    }
+
+    @Override
+    public int getBarWidth(ItemStack stack) {
+        double filled = getAECurrentPower(stack) / getAEMaxPower(stack);
+        return Mth.clamp((int) (filled * 13), 0, 13);
+    }
+
+    @Override
+    public int getBarColor(ItemStack stack) {
+        // This is the standard green color of full durability bars
+        return Mth.hsvToRgb(1 / 3.0F, 1.0F, 1.0F);
     }
 
     @Override
