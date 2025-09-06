@@ -15,7 +15,7 @@ public class MixinGridLinkables {
     @Inject(method = "get",at=@At("HEAD"),cancellable = true)
     private static void mixinGridLinkables$get(ItemLike itemLike, CallbackInfoReturnable<IGridLinkableHandler> cir) {
         Item itemInMixin = itemLike.asItem();
-        if(itemInMixin != null && itemInMixin instanceof ILinkableItem linkable) {
+        if(itemInMixin instanceof ILinkableItem linkable) {
             cir.setReturnValue(linkable.getLinkableHandler());
         }
     }
