@@ -176,8 +176,8 @@ dependencies {
     implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:6654541")
     implementation fg.deobf("appeng:appliedenergistics2-forge:15.4.8")
     implementation fg.deobf("curse.maven:aeinfinitybooster-559313:6482257")
-    implementation fg.deobf("curse.maven:arsarms-1307929:6921320")
-    runtimeOnly fg.deobf("curse.maven:tacz-curiosable-ammo-box-1339813:6956113")
+    //implementation fg.deobf("curse.maven:arsarms-1307929:6921320")
+    runtimeOnly fg.deobf("curse.maven:tacz-curiosable-ammo-box-1339813:6965953")
 
     //jei
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
@@ -185,11 +185,11 @@ dependencies {
     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
     //前提mod
-    runtimeOnly fg.deobf("curse.maven:geckolib-388172:6920925")
-    runtimeOnly fg.deobf("curse.maven:ars-nouveau-401955:6688854")
-    runtimeOnly fg.deobf("curse.maven:arscurios-1311075:6891705")
-    runtimeOnly fg.deobf("curse.maven:armslib-1328268:6921304")
-    runtimeOnly fg.deobf("curse.maven:castlib-1310383:6880562")
+    //runtimeOnly fg.deobf("curse.maven:geckolib-388172:6920925")
+    //runtimeOnly fg.deobf("curse.maven:ars-nouveau-401955:6688854")
+    //runtimeOnly fg.deobf("curse.maven:arscurios-1311075:6891705")
+    //runtimeOnly fg.deobf("curse.maven:armslib-1328268:6921304")
+    //runtimeOnly fg.deobf("curse.maven:castlib-1310383:6880562")
 
     runtimeOnly fg.deobf('curse.maven:guidme-1173950:6679102')
     runtimeOnly fg.deobf('curse.maven:tagtooltips-899941:6407506')

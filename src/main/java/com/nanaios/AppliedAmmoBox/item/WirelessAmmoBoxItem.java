@@ -126,6 +126,12 @@ public class WirelessAmmoBoxItem extends WirelessAmmoBoxBase implements IChecked
     }
 
     @Override
+    public int getAmmoCount(ItemStack ammoBox) {
+        if(getAECurrentPower(ammoBox) <= 0) return 0;
+        return super.getAmmoCount(ammoBox);
+    }
+
+    @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> components, @NotNull TooltipFlag isAdvanced) {
         super.appendHoverText(stack, level, components, isAdvanced);
 
