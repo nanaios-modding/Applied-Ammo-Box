@@ -1,6 +1,6 @@
-package com.nanaios.AppliedAmmoBox.recipes;
+package com.nanaios.applied_ammo_box.recipes;
 
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
+import com.nanaios.applied_ammo_box.AppliedAmmoBox;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;

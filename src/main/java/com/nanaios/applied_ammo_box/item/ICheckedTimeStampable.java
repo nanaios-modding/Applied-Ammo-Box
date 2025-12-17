@@ -1,4 +1,4 @@
-package com.nanaios.AppliedAmmoBox.item;
+package com.nanaios.applied_ammo_box.item;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;

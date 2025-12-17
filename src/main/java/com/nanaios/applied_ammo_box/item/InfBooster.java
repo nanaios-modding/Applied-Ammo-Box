@@ -1,7 +1,6 @@
-package com.nanaios.AppliedAmmoBox.item;
+package com.nanaios.applied_ammo_box.item;
 
 import appeng.blockentity.networking.WirelessAccessPointBlockEntity;
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import net.minecraft.world.entity.player.Player;
 import uk.co.hexeption.aeinfinitybooster.setup.ModItems;
 

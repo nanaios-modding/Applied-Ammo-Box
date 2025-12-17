@@ -1,9 +1,8 @@
-package com.nanaios.AppliedAmmoBox.mixin.tacz;
+package com.nanaios.applied_ammo_box.mixin.tacz;
 
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
-import com.nanaios.AppliedAmmoBox.item.WirelessAmmoBoxItem;
+import com.nanaios.applied_ammo_box.item.WirelessAmmoBoxItem;
 import com.tacz.guns.client.gui.overlay.GunHudOverlay;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;

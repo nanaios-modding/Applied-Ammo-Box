@@ -1,10 +1,7 @@
-package com.nanaios.AppliedAmmoBox.registries;
+package com.nanaios.applied_ammo_box.registries;
 
-import appeng.api.config.Actionable;
-import appeng.items.tools.powered.powersink.AEBasePoweredItem;
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
-import com.nanaios.AppliedAmmoBox.item.WirelessAmmoBoxBase;
-import com.nanaios.AppliedAmmoBox.item.WirelessAmmoBoxItem;
+import com.nanaios.applied_ammo_box.AppliedAmmoBox;
+import com.nanaios.applied_ammo_box.item.WirelessAmmoBoxBase;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;

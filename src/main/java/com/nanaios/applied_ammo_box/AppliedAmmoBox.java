@@ -1,13 +1,12 @@
-package com.nanaios.AppliedAmmoBox;
+package com.nanaios.applied_ammo_box;
 
-import com.nanaios.AppliedAmmoBox.network.AppliedAmmoBoxNetwork;
-import com.nanaios.AppliedAmmoBox.recipes.AppliedAmmoBoxRecipes;
-import com.nanaios.AppliedAmmoBox.recipes.NbtIngredient;
-import com.nanaios.AppliedAmmoBox.registries.AppliedAmmoBoxCreativeTabs;
-import com.nanaios.AppliedAmmoBox.registries.AppliedAmmoBoxItems;
+import com.nanaios.applied_ammo_box.network.AppliedAmmoBoxNetwork;
+import com.nanaios.applied_ammo_box.recipes.AppliedAmmoBoxRecipes;
+import com.nanaios.applied_ammo_box.recipes.NbtIngredient;
+import com.nanaios.applied_ammo_box.registries.AppliedAmmoBoxCreativeTabs;
+import com.nanaios.applied_ammo_box.registries.AppliedAmmoBoxItems;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;

@@ -1,10 +1,9 @@
-package com.nanaios.AppliedAmmoBox.recipes;
+package com.nanaios.applied_ammo_box.recipes;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
+import com.nanaios.applied_ammo_box.AppliedAmmoBox;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;

@@ -1,8 +1,8 @@
-package com.nanaios.AppliedAmmoBox.mixin.ae2;
+package com.nanaios.applied_ammo_box.mixin.ae2;
 
 import appeng.api.features.GridLinkables;
 import appeng.api.features.IGridLinkableHandler;
-import com.nanaios.AppliedAmmoBox.item.ILinkableItem;
+import com.nanaios.applied_ammo_box.item.ILinkableItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import org.spongepowered.asm.mixin.Mixin;

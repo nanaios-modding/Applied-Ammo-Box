@@ -1,9 +1,9 @@
-package com.nanaios.AppliedAmmoBox.jei;
+package com.nanaios.applied_ammo_box.jei;
 
 import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
-import com.nanaios.AppliedAmmoBox.registries.AppliedAmmoBoxItems;
+import com.nanaios.applied_ammo_box.AppliedAmmoBox;
+import com.nanaios.applied_ammo_box.registries.AppliedAmmoBoxItems;
 import com.tacz.guns.init.ModItems;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;

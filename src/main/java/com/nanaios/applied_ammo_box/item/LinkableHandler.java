@@ -1,11 +1,11 @@
-package com.nanaios.AppliedAmmoBox.item;
+package com.nanaios.applied_ammo_box.item;
 
 import appeng.api.features.IGridLinkableHandler;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.item.ItemStack;
 
-import static com.nanaios.AppliedAmmoBox.item.WirelessAmmoBoxItem.TAG_ACCESS_POINT_POS;
+import static com.nanaios.applied_ammo_box.item.WirelessAmmoBoxItem.TAG_ACCESS_POINT_POS;
 
 public class LinkableHandler implements IGridLinkableHandler {
     @Override

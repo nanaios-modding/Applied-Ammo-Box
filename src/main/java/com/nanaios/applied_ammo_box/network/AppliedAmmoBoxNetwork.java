@@ -1,6 +1,6 @@
-package com.nanaios.AppliedAmmoBox.network;
+package com.nanaios.applied_ammo_box.network;
 
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
+import com.nanaios.applied_ammo_box.AppliedAmmoBox;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 

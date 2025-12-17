@@ -1,11 +1,10 @@
-package com.nanaios.AppliedAmmoBox.recipes;
+package com.nanaios.applied_ammo_box.recipes;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -13,15 +12,12 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Map;
-import java.util.Set;
 
 public class ShapedNbtRecipe extends ShapedRecipe {
     public ShapedNbtRecipe(ShapedRecipe base) {

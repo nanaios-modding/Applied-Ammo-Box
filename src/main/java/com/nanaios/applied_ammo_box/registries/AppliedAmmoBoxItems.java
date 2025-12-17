@@ -1,7 +1,7 @@
-package com.nanaios.AppliedAmmoBox.registries;
+package com.nanaios.applied_ammo_box.registries;
 
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
-import com.nanaios.AppliedAmmoBox.item.WirelessAmmoBoxItem;
+import com.nanaios.applied_ammo_box.AppliedAmmoBox;
+import com.nanaios.applied_ammo_box.item.WirelessAmmoBoxItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;

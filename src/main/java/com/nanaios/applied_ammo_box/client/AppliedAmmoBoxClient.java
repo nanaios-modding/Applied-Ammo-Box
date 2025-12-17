@@ -1,9 +1,9 @@
-package com.nanaios.AppliedAmmoBox.client;
+package com.nanaios.applied_ammo_box.client;
 
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
-import com.nanaios.AppliedAmmoBox.item.WirelessAmmoBoxItem;
-import com.nanaios.AppliedAmmoBox.network.AppliedAmmoBoxNetwork;
-import com.nanaios.AppliedAmmoBox.registries.AppliedAmmoBoxItems;
+import com.nanaios.applied_ammo_box.AppliedAmmoBox;
+import com.nanaios.applied_ammo_box.item.WirelessAmmoBoxItem;
+import com.nanaios.applied_ammo_box.network.AppliedAmmoBoxNetwork;
+import com.nanaios.applied_ammo_box.registries.AppliedAmmoBoxItems;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;

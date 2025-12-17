@@ -1,4 +1,4 @@
-package com.nanaios.AppliedAmmoBox.item;
+package com.nanaios.applied_ammo_box.item;
 
 import appeng.api.config.AccessRestriction;
 import appeng.api.config.Actionable;
@@ -12,7 +12,7 @@ import appeng.core.localization.PlayerMessages;
 import appeng.core.localization.Tooltips;
 import appeng.util.Platform;
 import com.mojang.datafixers.util.Pair;
-import com.nanaios.AppliedAmmoBox.AppliedAmmoBox;
+import com.nanaios.applied_ammo_box.AppliedAmmoBox;
 import com.tacz.guns.item.AmmoBoxItem;
 import net.minecraft.Util;
 import net.minecraft.core.GlobalPos;
@@ -32,7 +32,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.ModList;
 import uk.co.hexeption.aeinfinitybooster.AEInfinityBooster;
