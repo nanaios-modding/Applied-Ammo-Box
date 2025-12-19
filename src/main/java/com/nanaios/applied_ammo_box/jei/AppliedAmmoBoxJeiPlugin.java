@@ -31,6 +31,8 @@ public class AppliedAmmoBoxJeiPlugin implements IModPlugin {
     private Map<IRecipeCategory, Collection<ResourceLocation>> recipesRemoved;
     private Map<ResourceLocation, IRecipeCategory> categoryById;
 
+
+
     @Override
     public ResourceLocation getPluginUid() {
         return ID;

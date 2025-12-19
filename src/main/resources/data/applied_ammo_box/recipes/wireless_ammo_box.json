@@ -16,7 +16,6 @@
       "item": "ae2:controller"
     },
     "d": {
-      "type":"applied_ammo_box:nbt",
       "item": "tacz:ammo_box",
       "nbt": { "Level": 2 }
     },
