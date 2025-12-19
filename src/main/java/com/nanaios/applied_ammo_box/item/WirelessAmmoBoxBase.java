@@ -299,10 +299,6 @@ public class WirelessAmmoBoxBase extends AmmoBoxItem implements IAEItemPowerStor
         }
     }
 
-    /**
-     * Changes the maximum power of the chargeable item based on a multiplier for the configured default power. The
-     * multiplier is clamped to [1,100]
-     */
     protected final void setAEMaxPowerMultiplier(ItemStack stack, int multiplier) {
         multiplier = Mth.clamp(multiplier, 1, 100);
         setAEMaxPower(stack, multiplier * powerCapacity.getAsDouble());

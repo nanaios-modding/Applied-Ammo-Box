@@ -12,6 +12,7 @@ import appeng.core.localization.GuiText;
 import appeng.core.localization.Tooltips;
 import appeng.me.helpers.ChannelPowerSrc;
 import appeng.me.helpers.PlayerSource;
+import com.nanaios.applied_ammo_box.config.AppliedAmmoBoxConfig;
 import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IAmmoBox;
@@ -115,7 +116,7 @@ public class WirelessAmmoBoxItem extends WirelessAmmoBoxBase implements IChecked
         AEKey key = AEItemKey.of(ammoStack);
         if(key == null) return;
 
-        double needPower = needAmmoCount * 1000d;
+        double needPower = needAmmoCount * AppliedAmmoBoxConfig.AMMO_BOX_USE_POWER_PER_AMMO.get();
         double extractPower = extractAEPower(ammoBox,needPower,Actionable.SIMULATE);
         extractAEPower(ammoBox,extractPower,Actionable.MODULATE);
 
