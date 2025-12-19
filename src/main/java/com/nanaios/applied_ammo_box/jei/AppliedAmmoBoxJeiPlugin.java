@@ -3,6 +3,7 @@ package com.nanaios.applied_ammo_box.jei;
 import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
 import com.nanaios.applied_ammo_box.AppliedAmmoBox;
+import com.nanaios.applied_ammo_box.config.AppliedAmmoBoxConfig;
 import com.nanaios.applied_ammo_box.registries.AppliedAmmoBoxItems;
 import com.tacz.guns.init.ModItems;
 import mezz.jei.api.IModPlugin;
@@ -40,6 +41,7 @@ public class AppliedAmmoBoxJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
+        if(!AppliedAmmoBoxConfig.JEI_RECIPE_DISPLAY_CORRECTION.get()) return;
 
         ItemStack output = new ItemStack(AppliedAmmoBoxItems.AMMO_BOX.get());
 
@@ -74,6 +76,7 @@ public class AppliedAmmoBoxJeiPlugin implements IModPlugin {
 
     @Override
     public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
+        if(!AppliedAmmoBoxConfig.JEI_RECIPE_DISPLAY_CORRECTION.get()) return;
         runtime = jeiRuntime;
         recipesRemoved = new HashMap<>();
         categoryById = runtime.getRecipeManager().createRecipeCategoryLookup()
