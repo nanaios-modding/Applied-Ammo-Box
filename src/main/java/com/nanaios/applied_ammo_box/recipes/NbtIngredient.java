@@ -15,6 +15,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -48,7 +49,7 @@ public class NbtIngredient extends Ingredient {
     }
 
     @Override
-    public IIngredientSerializer<? extends Ingredient> getSerializer() {
+    public @NotNull IIngredientSerializer<? extends Ingredient> getSerializer() {
         return Serializer.INSTANCE;
     }
 
@@ -56,7 +57,7 @@ public class NbtIngredient extends Ingredient {
         public static final Serializer INSTANCE = new Serializer();
 
         @Override
-        public NbtIngredient parse(JsonObject json) {
+        public @NotNull NbtIngredient parse(@NotNull JsonObject json) {
             ResourceLocation itemId = AppliedAmmoBox.rlSingle(GsonHelper.getAsString(json, "item"));
             Item item = ForgeRegistries.ITEMS.getValue(itemId);
 
@@ -72,7 +73,7 @@ public class NbtIngredient extends Ingredient {
         }
 
         @Override
-        public NbtIngredient parse(FriendlyByteBuf buffer) {
+        public @NotNull NbtIngredient parse(FriendlyByteBuf buffer) {
             Item item = buffer.readRegistryIdSafe(Item.class);
             CompoundTag tag = buffer.readNbt();
             return new NbtIngredient(item, tag);

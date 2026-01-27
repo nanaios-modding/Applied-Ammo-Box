@@ -16,6 +16,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -25,14 +26,14 @@ public class ShapedNbtRecipe extends ShapedRecipe {
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public @NotNull RecipeSerializer<?> getSerializer() {
         return AppliedAmmoBoxRecipes.SHAPED_NBT_SERIALIZER.get();
     }
 
     public static class Serializer implements RecipeSerializer<ShapedNbtRecipe> {
         @SuppressWarnings("removal")
         @Override
-        public ShapedNbtRecipe fromJson(ResourceLocation id, JsonObject json) {
+        public @NotNull ShapedNbtRecipe fromJson(@NotNull ResourceLocation id, @NotNull JsonObject json) {
             ShapedRecipe base = RecipeSerializer.SHAPED_RECIPE.fromJson(id, json);
 
             JsonObject keys = GsonHelper.getAsJsonObject(json, "key");
@@ -78,13 +79,13 @@ public class ShapedNbtRecipe extends ShapedRecipe {
         }
 
         @Override
-        public ShapedNbtRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buf) {
+        public ShapedNbtRecipe fromNetwork(@NotNull ResourceLocation id, @NotNull FriendlyByteBuf buf) {
             ShapedRecipe base = RecipeSerializer.SHAPED_RECIPE.fromNetwork(id, buf);
             return new ShapedNbtRecipe(base);
         }
 
         @Override
-        public void toNetwork(FriendlyByteBuf buf, ShapedNbtRecipe recipe) {
+        public void toNetwork(@NotNull FriendlyByteBuf buf, @NotNull ShapedNbtRecipe recipe) {
             RecipeSerializer.SHAPED_RECIPE.toNetwork(buf, recipe);
         }
     }

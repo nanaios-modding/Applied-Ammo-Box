@@ -1,7 +1,6 @@
 package com.nanaios.applied_ammo_box.registries;
 
 import com.nanaios.applied_ammo_box.AppliedAmmoBox;
-import com.nanaios.applied_ammo_box.item.WirelessAmmoBoxBase;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -18,12 +17,7 @@ public class AppliedAmmoBoxCreativeTabs {
             .icon(() -> new ItemStack(AppliedAmmoBoxItems.AMMO_BOX.get()))
             .displayItems((params, output) -> {
                 Item item= AppliedAmmoBoxItems.AMMO_BOX.get();
-                // ここでタブに表示するアイテムを指定
-                if(item instanceof WirelessAmmoBoxBase ammoBox) {
-                    ammoBox.addToMainCreativeTab(output);
-                } else {
-                    output.accept(item);
-                }
+                output.accept(item);
             })
             .build()
     );
