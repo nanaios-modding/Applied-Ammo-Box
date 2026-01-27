@@ -89,5 +89,4 @@ public class ShapedNbtRecipe extends ShapedRecipe {
             RecipeSerializer.SHAPED_RECIPE.toNetwork(buf, recipe);
         }
     }
-
 }
